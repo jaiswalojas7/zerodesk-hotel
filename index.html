@@ -13,7 +13,9 @@
     <nav>
       <button class="nav-btn active" data-view="home">Book</button>
       <button class="nav-btn" data-view="booking">My Booking</button>
-      <button class="nav-btn" data-view="admin">Admin</button>
+      <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
+      <button class="nav-btn" data-view="auth" id="authNav">Sign in</button>
+      <button class="secondary" id="signOut" hidden>Sign out</button>
     </nav>
   </header>
 
@@ -62,6 +64,8 @@
       </div>
     </section>
 
+    <section id="auth" class="view"><div class="form-card" style="max-width:460px;margin:auto"><p class="eyebrow">GUEST ACCOUNT</p><h2>Sign in / Register</h2><p>Use your email to access bookings from any device.</p><div class="field"><label>Full name (for registration)</label><input id="authName" autocomplete="name" placeholder="Your name"></div><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="email"></div><div class="field"><label>Password (minimum 8 characters)</label><input id="authPassword" type="password" autocomplete="current-password"></div><div class="form-actions"><button class="primary" id="loginBtn">Sign in</button><button class="secondary" id="registerBtn">Create account</button></div><div id="authMessage" class="alert info" aria-live="polite">Check your email after registering.</div></div></section>
+
     <section id="booking" class="view">
       <div class="section-head">
         <div>
@@ -78,7 +82,7 @@
           <p class="eyebrow">HOTEL OPERATIONS</p>
           <h2>Admin Dashboard</h2>
         </div>
-        <button class="secondary" id="clearDemo">Reset Demo Data</button>
+        <span class="badge">Authorized staff only</span>
       </div>
       <div class="stats" id="stats"></div>
       <div class="admin-panel">
@@ -98,6 +102,8 @@
 
   <div id="toast" class="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

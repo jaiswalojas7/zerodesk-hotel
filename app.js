@@ -1,268 +1,103 @@
-const ROOMS = [
-  { id:"101", name:"Deluxe King", price:2499, maxGuests:2, features:["King Bed","Wi‑Fi","Smart TV"] },
-  { id:"102", name:"Premium Twin", price:3499, maxGuests:3, features:["Twin Beds","Breakfast","Work Desk"] },
-  { id:"103", name:"Executive Suite", price:4999, maxGuests:4, features:["King Bed","Living Area","Breakfast"] }
-];
-
-const KEY_TTL_MS = 12 * 60 * 60 * 1000;
-
-function getData(){
-  return JSON.parse(localStorage.getItem("zerodeskData") || JSON.stringify({
-    bookings: [],
-    roomStatus: { "101":"available", "102":"available", "103":"available" }
-  }));
+// ZeroDesk Phase 2 — Supabase-backed educational prototype.
+// Digital key and door unlock are intentionally DEMO ONLY.
+const cfg = window.ZERODESK_CONFIG;
+const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+let currentUser = null, rooms = [], myBookings = [], isAdmin = false;
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
+const safe = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
+function show(view, load=true){
+ if(view==='admin'&&!isAdmin){toast('Admin access required');return;}
+ if(view==='booking'&&!currentUser)view='auth';
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+ document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
+ if(load&&view==='booking')loadBookings(); if(view==='admin')loadAdmin();
+ window.scrollTo(0,0);
 }
-function saveData(data){ localStorage.setItem("zerodeskData", JSON.stringify(data)); }
-function getCurrentBooking(){
-  const id = localStorage.getItem("zerodeskCurrentBooking");
-  if(!id) return null;
-  return getData().bookings.find(b => b.id === id) || null;
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
+$('startBooking').onclick=()=>$('roomsSection').scrollIntoView({behavior:'smooth'});
+$('loginBtn').onclick=async()=>{
+ const {error}=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});
+ if(error) return toast(error.message); toast('Signed in'); await refreshSession(); show('home');
+};
+$('registerBtn').onclick=async()=>{
+ const email=$('authEmail').value.trim(), password=$('authPassword').value, full_name=$('authName').value.trim();
+ if(!full_name||password.length<8)return toast('Enter your name and an 8+ character password');
+ const {error}=await db.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:location.origin}});
+ if(error)return toast(error.message);
+ $('authMessage').textContent='Registration submitted. Check your email and confirm your account before signing in.';
+};
+$('signOut').onclick=async()=>{await db.auth.signOut(); await refreshSession(); show('home');};
+async function refreshSession(){
+ const {data:{user}}=await db.auth.getUser(); currentUser=user;
+ $('authNav').hidden=!!user; $('signOut').hidden=!user;
+ isAdmin=false;
+ if(user){
+  const {data,error}=await db.rpc('is_hotel_admin');
+  if(!error)isAdmin=!!data;
+  // The profile contains only non-sensitive display fields.
+  const {data:profile}=await db.from('profiles').select('id').eq('id',user.id).maybeSingle();
+  if(!profile)await db.from('profiles').insert({id:user.id,full_name:user.user_metadata?.full_name||''});
+ }
+ $('adminNav').hidden=!isAdmin;
+ await loadRooms();
 }
-function id(){ return "ZD-" + Math.random().toString(36).slice(2,8).toUpperCase(); }
-function token(){ return "KEY-" + cryptoRandom(10); }
-function cryptoRandom(len){
-  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out="";
-  for(let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
-  return out;
+async function loadRooms(){
+ const {data,error}=await db.from('rooms').select('id,room_number,room_type,price_per_night,is_active').eq('is_active',true).order('room_number');
+ if(error){$('roomGrid').textContent='Could not load rooms: '+error.message;return;}
+ rooms=data||[];
+ $('roomGrid').innerHTML=rooms.map(r=>`<div class="room-card"><p class="eyebrow">ROOM ${safe(r.room_number)}</p><h3>${safe(r.room_type)}</h3><p class="room-price">${money(r.price_per_night)} / night</p><p class="room-meta">Availability is checked for your selected dates.</p><button class="primary" data-room="${r.id}">Choose Room</button></div>`).join('');
+ $('roomGrid').querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>openForm(Number(b.dataset.room)));
 }
-function money(n){ return new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n); }
-function toast(msg){
-  const el=document.getElementById("toast");
-  el.textContent=msg; el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"),2200);
+function openForm(roomId){
+ if(!currentUser){toast('Sign in to book a room');show('auth');return;}
+ const r=rooms.find(x=>x.id===roomId); if(!r)return;
+ show('booking',false);
+ $('bookingContent').innerHTML=`<div class="form-layout"><div class="form-card"><p class="eyebrow">NEW BOOKING</p><h3>${safe(r.room_type)} · ${safe(r.room_number)}</h3><div class="field"><label>Check-in</label><input id="checkinDate" type="date" min="${today()}" value="${today()}"></div><div class="field"><label>Check-out</label><input id="checkoutDate" type="date" min="${today()}"></div><div class="alert info">Demo reservation: no payment is collected. Identity verification and smart locks are not connected.</div><button class="primary" id="reserveBtn">Confirm demo booking</button></div><div class="summary-card"><h3>${safe(r.room_type)}</h3><p>${money(r.price_per_night)} per night</p></div></div>`;
+ $('reserveBtn').onclick=()=>reserve(r.id);
 }
-function todayISO(){
-  const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
-  return d.toISOString().slice(0,10);
+async function reserve(roomId){
+ const a=$('checkinDate').value,b=$('checkoutDate').value;
+ if(!a||!b||b<=a)return toast('Choose valid dates');
+ $('reserveBtn').disabled=true;
+ const {data,error}=await db.rpc('reserve_room',{p_room_id:roomId,p_check_in:a,p_check_out:b});
+ if(error){$('reserveBtn').disabled=false;return toast(error.message);}
+ toast('Demo reservation saved online'); await loadBookings();
 }
-
-function switchView(view){
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  document.getElementById(view).classList.add("active");
-  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
-  if(view==="booking") renderBooking();
-  if(view==="admin") renderAdmin();
-  window.scrollTo({top:0,behavior:"smooth"});
+async function loadBookings(){
+ if(!currentUser)return;
+ const {data,error}=await db.from('bookings').select('id,room_id,check_in,check_out,total_amount,status,created_at').eq('guest_id',currentUser.id).order('created_at',{ascending:false});
+ if(error){$('bookingContent').textContent=error.message;return;}
+ myBookings=data||[];
+ const byId=Object.fromEntries(rooms.map(r=>[r.id,r]));
+ $('bookingContent').innerHTML=myBookings.length?myBookings.map(b=>{
+ const r=byId[b.room_id];
+ return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(r?.room_type||'Room')} · ${safe(r?.room_number||b.room_id)}</h3><p>${safe(b.check_in)} → ${safe(b.check_out)}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-checkin="${b.id}">Demo check-in</button>`:''}${b.status==='checked_in'?`<button class="primary" data-key="${b.id}">Show demo QR</button><button class="secondary" data-checkout="${b.id}">Demo checkout</button>`:''}</div><div id="key-${b.id}"></div></div>`;
+ }).join(''):'<div class="empty">No bookings yet. Choose a room from the Book tab.</div>';
+ document.querySelectorAll('[data-checkin]').forEach(x=>x.onclick=()=>changeStatus('demo_check_in',x.dataset.checkin));
+ document.querySelectorAll('[data-checkout]').forEach(x=>x.onclick=()=>changeStatus('demo_check_out',x.dataset.checkout));
+ document.querySelectorAll('[data-key]').forEach(x=>x.onclick=()=>demoKey(x.dataset.key));
 }
-
-document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>switchView(btn.dataset.view)));
-document.getElementById("startBooking").addEventListener("click",()=>{
-  document.getElementById("roomsSection").scrollIntoView({behavior:"smooth"});
-});
-
-function renderRooms(){
-  const data=getData();
-  const grid=document.getElementById("roomGrid");
-  grid.innerHTML=ROOMS.map(room=>{
-    const status=data.roomStatus[room.id] || "available";
-    const disabled=status!=="available";
-    return `
-      <div class="room-card">
-        <div class="room-top">
-          <div><div class="eyebrow">ROOM ${room.id}</div><h3>${room.name}</h3></div>
-          <div class="room-price">${money(room.price)}<small>/night</small></div>
-        </div>
-        <div class="room-meta">Up to ${room.maxGuests} guests</div>
-        <div class="room-features">${room.features.map(f=>`<span class="tag">${f}</span>`).join("")}</div>
-        <button class="primary" ${disabled?"disabled":""} onclick="openBookingForm('${room.id}')">
-          ${disabled ? "Unavailable" : "Choose Room"}
-        </button>
-      </div>
-    `;
-  }).join("");
+async function changeStatus(fn,id){
+ const {error}=await db.rpc(fn,{p_booking_id:id});
+ if(error)return toast(error.message);toast('Demo booking updated');await loadBookings();
 }
-function openBookingForm(roomId){
-  const room=ROOMS.find(r=>r.id===roomId);
-  switchView("booking");
-  document.getElementById("bookingContent").innerHTML=`
-    <div class="form-layout">
-      <div class="form-card">
-        <div class="eyebrow">STEP 1</div>
-        <h3>Reserve ${room.name} · Room ${room.id}</h3>
-        <div class="field"><label>Check-in date</label><input id="checkinDate" type="date" min="${todayISO()}" value="${todayISO()}"></div>
-        <div class="field"><label>Check-out date</label><input id="checkoutDate" type="date" min="${todayISO()}" value="${todayISO()}"></div>
-        <div class="field"><label>Guest name</label><input id="guestName" placeholder="e.g. Ojas Jaiswal"></div>
-        <div class="field"><label>Phone</label><input id="guestPhone" placeholder="+91 98765 43210"></div>
-        <div class="field"><label>Email</label><input id="guestEmail" type="email" placeholder="you@example.com"></div>
-        <div class="field"><label>Number of guests</label><select id="guestCount">${Array.from({length:room.maxGuests},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("")}</select></div>
-        <div class="alert info">Demo note: payment and identity verification are simulated. Do not upload real documents.</div>
-        <button class="primary" onclick="createBooking('${room.id}')">Continue to Pre‑Check‑in</button>
-      </div>
-      <div class="summary-card">
-        <div class="eyebrow">YOUR ROOM</div>
-        <h2>${room.name}</h2><p>Room ${room.id}</p>
-        <h3 style="margin-top:25px">${money(room.price)} / night</h3>
-        <div class="room-features">${room.features.map(f=>`<span class="tag">${f}</span>`).join("")}</div>
-      </div>
-    </div>
-  `;
+function demoKey(id){
+ const b=myBookings.find(x=>x.id===id);if(!b||b.status!=='checked_in')return;
+ const target=$('key-'+id);target.innerHTML='<div class="alert warning">DEMO QR ONLY — not a secure access credential or real door key.</div><div class="qr" id="qr-'+id+'"></div><button class="secondary" id="unlock-'+id+'">Simulate unlock</button>';
+ new QRCode($('qr-'+id),{text:'ZERODESK-DEMO:'+id,width:180,height:180});
+ $('unlock-'+id).onclick=()=>toast('Simulated door unlocked. No physical lock connected.');
 }
-function createBooking(roomId){
-  const name=document.getElementById("guestName").value.trim();
-  const phone=document.getElementById("guestPhone").value.trim();
-  const email=document.getElementById("guestEmail").value.trim();
-  const checkin=document.getElementById("checkinDate").value;
-  const checkout=document.getElementById("checkoutDate").value;
-  const guests=Number(document.getElementById("guestCount").value);
-  if(!name||!phone||!email||!checkin||!checkout){toast("Please complete all fields.");return;}
-  if(new Date(checkout)<=new Date(checkin)){toast("Check-out must be after check-in.");return;}
-  const data=getData();
-  if(data.roomStatus[roomId]!=="available"){toast("Room is no longer available.");renderRooms();return;}
-  const room=ROOMS.find(r=>r.id===roomId);
-  const nights=Math.max(1,Math.ceil((new Date(checkout)-new Date(checkin))/86400000));
-  const booking={id:id(),roomId,roomName:room.name,name,phone,email,guests,checkin,checkout,nights,total:room.price*nights,status:"reserved",idVerified:false,paymentStatus:"paid-demo",key:null,keyExpiresAt:null,createdAt:new Date().toISOString()};
-  data.bookings.push(booking);
-  data.roomStatus[roomId]="occupied";
-  saveData(data);
-  localStorage.setItem("zerodeskCurrentBooking",booking.id);
-  toast("Room reserved.");
-  renderPreCheckin(booking.id);
+async function loadAdmin(){
+ if(!isAdmin)return;
+ const {data,error}=await db.from('bookings').select('id,guest_id,room_id,check_in,check_out,total_amount,status').order('check_in',{ascending:false});
+ if(error){$('adminBookings').textContent=error.message;return;}
+ const bs=data||[];
+ $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Demo booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
+ $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span>${safe(b.id.slice(0,8))}</span><span>Room ${safe(rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)}</span><span>${safe(b.check_in)} → ${safe(b.check_out)}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
+ $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
 }
-function renderPreCheckin(bookingId){
-  const b=getData().bookings.find(x=>x.id===bookingId);
-  document.getElementById("bookingContent").innerHTML=`
-    <div class="form-layout">
-      <div class="form-card">
-        <div class="eyebrow">STEP 2</div>
-        <h3>Complete contactless pre‑check‑in</h3>
-        <div class="alert info">For your college demo, this is a mock identity verification flow. Use placeholder details only.</div>
-        <div class="field"><label>Identity document</label><select id="idType"><option>Passport</option><option>Driving Licence</option><option>Government ID</option></select></div>
-        <div class="field"><label>Demo document number</label><input id="idNumber" placeholder="DEMO-123456"></div>
-        <div class="field"><label>Document file (demo only)</label><input id="idFile" type="file" accept=".jpg,.jpeg,.png,.pdf"></div>
-        <div class="field"><label>Signature</label><input id="signature" placeholder="Type your full name"></div>
-        <div class="alert warning">Production version: replace this mock step with a compliant KYC/identity-verification provider and secure document storage.</div>
-        <div class="form-actions">
-          <button class="secondary" onclick="switchView('home')">Back</button>
-          <button class="primary" onclick="completeCheckin('${b.id}')">Verify & Check In</button>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="eyebrow">RESERVATION</div>
-        <h2>${b.roomName}</h2>
-        <p>Room ${b.roomId}</p>
-        <p>${b.checkin} → ${b.checkout}</p>
-        <p>${b.guests} guest(s) · ${money(b.total)}</p>
-        <span class="booking-status status-reserved">Reserved</span>
-      </div>
-    </div>
-  `;
-}
-function completeCheckin(bookingId){
-  const idNum=document.getElementById("idNumber").value.trim();
-  const sig=document.getElementById("signature").value.trim();
-  if(!idNum||!sig){toast("Enter the demo ID and signature.");return;}
-  const data=getData();
-  const b=data.bookings.find(x=>x.id===bookingId);
-  b.idVerified=true;b.status="checked-in";b.key=token();b.keyExpiresAt=Date.now()+KEY_TTL_MS;
-  saveData(data); localStorage.setItem("zerodeskCurrentBooking",b.id);
-  toast("Check-in complete.");
-  renderDigitalKey(b.id);
-}
-function renderDigitalKey(bookingId){
-  const b=getData().bookings.find(x=>x.id===bookingId);
-  document.getElementById("bookingContent").innerHTML=`
-    <div class="form-layout">
-      <div class="key-card">
-        <div class="eyebrow" style="color:#93c5fd">STEP 3</div>
-        <h3>Digital Room Key</h3>
-        <p>Room ${b.roomId} · ${b.roomName}</p>
-        <div id="qrcode" class="qr"></div>
-        <div class="key-token">${b.key}</div>
-        <button class="primary" style="background:#2563eb;width:100%" onclick="unlockDoor('${b.id}')">Unlock Door (Demo)</button>
-        <div class="form-actions" style="justify-content:center">
-          <button class="secondary" onclick="checkout('${b.id}')">Check Out</button>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="eyebrow">READY</div>
-        <h2>You're checked in.</h2>
-        <p>The QR is a demonstration credential. In production, this would be tied to a secure electronic-lock system.</p>
-        <div class="alert success">✓ Identity verification marked complete</div>
-        <div class="alert success">✓ Payment marked complete (demo)</div>
-        <div class="alert success">✓ Digital key issued</div>
-      </div>
-    </div>
-  `;
-  new QRCode(document.getElementById("qrcode"),{
-    text: JSON.stringify({booking:b.id,room:b.roomId,key:b.key}),
-    width:180,height:180
-  });
-}
-function unlockDoor(bookingId){
-  const b=getData().bookings.find(x=>x.id===bookingId);
-  if(!b||b.status!=="checked-in"){toast("Key is not active.");return;}
-  if(Date.now()>b.keyExpiresAt){toast("Key expired.");return;}
-  toast(`✓ Demo door unlocked for Room ${b.roomId}`);
-}
-function checkout(bookingId){
-  const data=getData();
-  const b=data.bookings.find(x=>x.id===bookingId);
-  if(!b)return;
-  b.status="checked-out";b.key=null;b.keyExpiresAt=null;
-  data.roomStatus[b.roomId]="cleaning";
-  saveData(data);
-  toast("Checked out. Room sent to housekeeping.");
-  renderBooking();
-  renderRooms();
-}
-function renderBooking(){
-  const b=getCurrentBooking();
-  if(!b){
-    document.getElementById("bookingContent").innerHTML=`
-      <div class="empty">
-        <h3>No booking yet</h3>
-        <p>Choose a room from the Book tab to start.</p>
-        <button class="primary" onclick="switchView('home')">Browse Rooms</button>
-      </div>`;
-    return;
-  }
-  if(b.status==="reserved"){renderPreCheckin(b.id);return;}
-  if(b.status==="checked-in"){renderDigitalKey(b.id);return;}
-  document.getElementById("bookingContent").innerHTML=`
-    <div class="summary-card">
-      <div class="eyebrow">COMPLETED</div>
-      <h2>${b.roomName}</h2>
-      <p>Booking ${b.id} · Room ${b.roomId}</p>
-      <span class="booking-status status-checkedout">Checked out</span>
-      <div class="alert success">Thank you, ${b.name}. Your demo stay is complete.</div>
-    </div>`;
-}
-function renderAdmin(){
-  const data=getData();
-  const bookings=data.bookings;
-  document.getElementById("stats").innerHTML=`
-    <div class="stat"><div class="num">${bookings.length}</div><div class="label">Total bookings</div></div>
-    <div class="stat"><div class="num">${bookings.filter(b=>b.status==="checked-in").length}</div><div class="label">Currently checked in</div></div>
-    <div class="stat"><div class="num">${bookings.filter(b=>b.status==="reserved").length}</div><div class="label">Awaiting check-in</div></div>
-    <div class="stat"><div class="num">${money(bookings.reduce((s,b)=>s+b.total,0))}</div><div class="label">Demo booking value</div></div>
-  `;
-  const rows=bookings.length?bookings.slice().reverse().map(b=>`
-    <div class="booking-row">
-      <div><strong>${b.name}</strong><br><small>${b.id}</small></div>
-      <div>Room ${b.roomId}<br><small>${b.roomName}</small></div>
-      <div>${b.checkin}<br><small>→ ${b.checkout}</small></div>
-      <div>${money(b.total)}<br><span class="booking-status ${b.status==="checked-in"?"status-checkedin":b.status==="reserved"?"status-reserved":"status-checkedout"}">${b.status}</span></div>
-      <div>${b.status==="checked-in"?`<button class="secondary" onclick="revokeKey('${b.id}')">Revoke Key</button>`:""}</div>
-    </div>
-  `).join(""):`<div class="empty">No bookings yet.</div>`;
-  document.getElementById("adminBookings").innerHTML=rows;
-  document.getElementById("adminRooms").innerHTML=ROOMS.map(r=>{
-    const s=data.roomStatus[r.id]||"available";
-    return `<div class="room-status"><strong>Room ${r.id}</strong><p>${r.name}</p><span class="${s}"><span class="dot"></span>${s}</span>${s==="cleaning"?`<button class="secondary" style="margin-top:10px" onclick="setRoomStatus('${r.id}','available')">Mark Clean</button>`:""}</div>`;
-  }).join("");
-}
-function revokeKey(bookingId){
-  const data=getData(); const b=data.bookings.find(x=>x.id===bookingId);
-  if(!b)return;b.key=null;b.keyExpiresAt=null;b.status="reserved";saveData(data);toast("Key revoked.");renderAdmin();
-}
-function setRoomStatus(roomId,status){
-  const data=getData();data.roomStatus[roomId]=status;saveData(data);toast(`Room ${roomId} marked ${status}.`);renderAdmin();renderRooms();
-}
-document.getElementById("clearDemo").addEventListener("click",()=>{
-  localStorage.removeItem("zerodeskData");localStorage.removeItem("zerodeskCurrentBooking");
-  toast("Demo data reset.");renderRooms();renderAdmin();renderBooking();
-});
-
-renderRooms();
-renderBooking();
+db.auth.onAuthStateChange(()=>{setTimeout(()=>refreshSession(),0);});
+refreshSession();
