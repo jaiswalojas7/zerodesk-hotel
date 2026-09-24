@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZeroDesk — Contactless Hotel Check-in</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Zero<span>Desk</span></div>
+    <nav>
+      <button class="nav-btn active" data-view="home">Book</button>
+      <button class="nav-btn" data-view="booking">My Booking</button>
+      <button class="nav-btn" data-view="admin">Admin</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section id="home" class="view active">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">CONTACTLESS HOTEL EXPERIENCE</p>
+          <h1>Check in.<br><span>Walk in.</span><br>Relax.</h1>
+          <p class="hero-copy">
+            A student-friendly prototype for a zero-front-desk hotel:
+            booking, pre-check-in, digital key and checkout in one flow.
+          </p>
+          <button class="primary" id="startBooking">Book a Room</button>
+        </div>
+        <div class="hero-card">
+          <div class="hero-icon">⌁</div>
+          <h3>ZeroDesk Pass</h3>
+          <p>Your room key lives on your phone.</p>
+          <div class="status-pill">● Demo mode</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">HOW IT WORKS</p>
+          <h2>Four steps. No reception queue.</h2>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step-card"><span>01</span><h3>Book</h3><p>Select your room and stay dates.</p></div>
+        <div class="step-card"><span>02</span><h3>Verify</h3><p>Complete the guest details and demo ID check.</p></div>
+        <div class="step-card"><span>03</span><h3>Unlock</h3><p>Receive a digital key and room QR code.</p></div>
+        <div class="step-card"><span>04</span><h3>Checkout</h3><p>Tap checkout and your demo key expires.</p></div>
+      </div>
+
+      <div id="roomsSection" class="rooms-section">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">AVAILABLE ROOMS</p>
+            <h2>Choose your room</h2>
+          </div>
+        </div>
+        <div id="roomGrid" class="room-grid"></div>
+      </div>
+    </section>
+
+    <section id="booking" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">GUEST PORTAL</p>
+          <h2 id="bookingTitle">My Booking</h2>
+        </div>
+      </div>
+      <div id="bookingContent"></div>
+    </section>
+
+    <section id="admin" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">HOTEL OPERATIONS</p>
+          <h2>Admin Dashboard</h2>
+        </div>
+        <button class="secondary" id="clearDemo">Reset Demo Data</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="admin-panel">
+        <h3>Bookings</h3>
+        <div id="adminBookings"></div>
+      </div>
+      <div class="admin-panel">
+        <h3>Room Status</h3>
+        <div id="adminRooms" class="admin-room-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ZeroDesk demo • Educational prototype • Do not upload real identity documents</p>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
