@@ -3,6 +3,8 @@
 const cfg = window.ZERODESK_CONFIG;
 const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
 let currentUser = null, rooms = [], myBookings = [], isAdmin = false;
+let recoveryMode = false;
+const recoveryError = new URLSearchParams(location.hash.replace(/^#/, '')).get('error_code');
 const $ = id => document.getElementById(id);
 const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 const safe = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -11,6 +13,7 @@ function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('
 function show(view, load=true){
  if(view==='admin'&&!isAdmin){toast('Admin access required');return;}
  if(view==='booking'&&!currentUser)view='auth';
+ if(view==='password'&&!currentUser){toast('Sign in or open a valid recovery link first');return;}
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
  document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
  if(load&&view==='booking')loadBookings(); if(view==='admin')loadAdmin();
@@ -29,10 +32,34 @@ $('registerBtn').onclick=async()=>{
  if(error)return toast(error.message);
  $('authMessage').textContent='Registration submitted. Check your email and confirm your account before signing in.';
 };
+$('forgotPasswordBtn').onclick=async()=>{
+ const email=$('authEmail').value.trim();
+ if(!email)return toast('Enter your registered email first');
+ $('forgotPasswordBtn').disabled=true;
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'});
+ $('forgotPasswordBtn').disabled=false;
+ $('authMessage').textContent=error ? error.message : 'If this account exists, a recovery email has been requested. Open only the newest link.';
+};
+$('changePasswordNav').onclick=()=>{recoveryMode=false;show('password');};
+$('updatePasswordBtn').onclick=async()=>{
+ const password=$('newPassword').value, confirm=$('confirmPassword').value;
+ if(password.length<8)return $('passwordMessage').textContent='Use at least 8 characters.';
+ if(password!==confirm)return $('passwordMessage').textContent='Passwords do not match.';
+ $('updatePasswordBtn').disabled=true;
+ const {error}=await db.auth.updateUser({password});
+ $('updatePasswordBtn').disabled=false;
+ if(error){$('passwordMessage').textContent=error.message;return;}
+ $('newPassword').value='';$('confirmPassword').value='';
+ recoveryMode=false;
+ $('passwordMessage').textContent='Password updated successfully. You can use it to sign in next time.';
+ toast('Password updated');
+ // Clear expired/recovery tokens from the address bar without a reload.
+ history.replaceState(null,'',location.pathname);
+};
 $('signOut').onclick=async()=>{await db.auth.signOut(); await refreshSession(); show('home');};
 async function refreshSession(){
  const {data:{user}}=await db.auth.getUser(); currentUser=user;
- $('authNav').hidden=!!user; $('signOut').hidden=!user;
+ $('authNav').hidden=!!user; $('signOut').hidden=!user; $('changePasswordNav').hidden=!user;
  isAdmin=false;
  if(user){
   const {data,error}=await db.rpc('is_hotel_admin');
@@ -99,5 +126,18 @@ async function loadAdmin(){
  $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span>${safe(b.id.slice(0,8))}</span><span>Room ${safe(rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)}</span><span>${safe(b.check_in)} → ${safe(b.check_out)}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
 }
-db.auth.onAuthStateChange(()=>{setTimeout(()=>refreshSession(),0);});
-refreshSession();
+db.auth.onAuthStateChange((event)=>{
+ if(event==='PASSWORD_RECOVERY'){
+  recoveryMode=true;
+  setTimeout(async()=>{await refreshSession();show('password');$('passwordMessage').textContent='Recovery link accepted. Set your new password below.';},0);
+ } else {
+  setTimeout(async()=>{await refreshSession();if(recoveryMode&&currentUser)show('password');},0);
+ }
+});
+refreshSession().then(()=>{
+ if(recoveryError){
+  $('authMessage').textContent='This recovery link has expired or was already used. Request a fresh link, or use Change password if already signed in.';
+  if(!currentUser)show('auth');
+  history.replaceState(null,'',location.pathname);
+ }
+});

@@ -15,6 +15,7 @@
       <button class="nav-btn" data-view="booking">My Booking</button>
       <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
       <button class="nav-btn" data-view="auth" id="authNav">Sign in</button>
+      <button class="secondary" id="changePasswordNav" hidden>Change password</button>
       <button class="secondary" id="signOut" hidden>Sign out</button>
     </nav>
   </header>
@@ -64,7 +65,19 @@
       </div>
     </section>
 
-    <section id="auth" class="view"><div class="form-card" style="max-width:460px;margin:auto"><p class="eyebrow">GUEST ACCOUNT</p><h2>Sign in / Register</h2><p>Use your email to access bookings from any device.</p><div class="field"><label>Full name (for registration)</label><input id="authName" autocomplete="name" placeholder="Your name"></div><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="email"></div><div class="field"><label>Password (minimum 8 characters)</label><input id="authPassword" type="password" autocomplete="current-password"></div><div class="form-actions"><button class="primary" id="loginBtn">Sign in</button><button class="secondary" id="registerBtn">Create account</button></div><div id="authMessage" class="alert info" aria-live="polite">Check your email after registering.</div></div></section>
+    <section id="auth" class="view"><div class="form-card" style="max-width:460px;margin:auto"><p class="eyebrow">GUEST ACCOUNT</p><h2>Sign in / Register</h2><p>Use your email to access bookings from any device.</p><div class="field"><label>Full name (for registration)</label><input id="authName" autocomplete="name" placeholder="Your name"></div><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="email"></div><div class="field"><label>Password (minimum 8 characters)</label><input id="authPassword" type="password" autocomplete="current-password"></div><div class="form-actions"><button class="primary" id="loginBtn">Sign in</button><button class="secondary" id="registerBtn">Create account</button></div><p><button class="text-action" id="forgotPasswordBtn" type="button">Forgot password?</button></p><div id="authMessage" class="alert info" aria-live="polite">Check your email after registering.</div></div></section>
+
+    <section id="password" class="view">
+      <div class="form-card" style="max-width:460px;margin:auto">
+        <p class="eyebrow">ACCOUNT SECURITY</p>
+        <h2 id="passwordTitle">Set a new password</h2>
+        <p id="passwordHelp">Choose a new password for your ZeroDesk account.</p>
+        <div class="field"><label for="newPassword">New password (at least 8 characters)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8"></div>
+        <div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8"></div>
+        <button class="primary" id="updatePasswordBtn">Update password</button>
+        <div id="passwordMessage" class="alert info" aria-live="polite">Use a unique password you have not used before.</div>
+      </div>
+    </section>
 
     <section id="booking" class="view">
       <div class="section-head">
