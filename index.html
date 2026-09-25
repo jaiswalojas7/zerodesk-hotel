@@ -97,7 +97,13 @@
         </div>
         <span class="badge">Authorized staff only</span>
       </div>
-      <div class="stats" id="stats"></div>
+      <div class="admin-panel" id="staffScanner">
+        <h3>Staff QR Check-in</h3><p>Scan a guest's short-lived QR pass or paste its code. Staff authorization is checked by Supabase.</p>
+        <div class="field"><label for="staffPass">Guest QR pass</label><input id="staffPass" placeholder="ZD3:..." autocomplete="off"></div>
+        <div class="form-actions"><button class="primary" id="verifyPassBtn">Verify &amp; check in</button><button class="secondary" id="startScannerBtn">Scan with camera</button><button class="secondary" id="stopScannerBtn" hidden>Stop camera</button></div>
+        <video id="scanVideo" autoplay playsinline muted hidden style="max-width:100%;width:420px;border-radius:12px;margin-top:12px"></video>
+        <div id="scanResult" class="alert info" role="status" aria-live="polite">Only staff with admin access can approve check-in.</div>
+      </div><div class="stats" id="stats"></div>
       <div class="admin-panel">
         <h3>Bookings</h3>
         <div id="adminBookings"></div>

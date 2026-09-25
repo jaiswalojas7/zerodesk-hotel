@@ -4,6 +4,7 @@ const cfg = window.ZERODESK_CONFIG;
 const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
 let currentUser = null, rooms = [], myBookings = [], isAdmin = false;
 let recoveryMode = false;
+let scanStream=null, scanTimer=null, scanBusy=false;
 const recoveryError = new URLSearchParams(location.hash.replace(/^#/, '')).get('error_code');
 const $ = id => document.getElementById(id);
 const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
@@ -16,6 +17,7 @@ function show(view, load=true){
  if(view==='password'&&!currentUser){toast('Sign in or open a valid recovery link first');return;}
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
  document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
+ if(view!=='admin')stopScanner();
  if(load&&view==='booking')loadBookings(); if(view==='admin')loadAdmin();
  window.scrollTo(0,0);
 }
@@ -101,11 +103,22 @@ async function loadBookings(){
  const byId=Object.fromEntries(rooms.map(r=>[r.id,r]));
  $('bookingContent').innerHTML=myBookings.length?myBookings.map(b=>{
  const r=byId[b.room_id];
- return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(r?.room_type||'Room')} · ${safe(r?.room_number||b.room_id)}</h3><p>${safe(b.check_in)} → ${safe(b.check_out)}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-checkin="${b.id}">Demo check-in</button>`:''}${b.status==='checked_in'?`<button class="primary" data-key="${b.id}">Show demo QR</button><button class="secondary" data-checkout="${b.id}">Demo checkout</button>`:''}</div><div id="key-${b.id}"></div></div>`;
+ return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(r?.room_type||'Room')} · ${safe(r?.room_number||b.room_id)}</h3><p>${safe(b.check_in)} → ${safe(b.check_out)}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-pass="${b.id}">Generate check-in QR</button>`:''}${b.status==='checked_in'?`<button class="primary" data-key="${b.id}">Show demo QR</button><button class="secondary" data-checkout="${b.id}">Demo checkout</button>`:''}</div><div id="key-${b.id}"></div></div>`;
  }).join(''):'<div class="empty">No bookings yet. Choose a room from the Book tab.</div>';
- document.querySelectorAll('[data-checkin]').forEach(x=>x.onclick=()=>changeStatus('demo_check_in',x.dataset.checkin));
+ document.querySelectorAll('[data-pass]').forEach(x=>x.onclick=()=>issueCheckinPass(x.dataset.pass));
  document.querySelectorAll('[data-checkout]').forEach(x=>x.onclick=()=>changeStatus('demo_check_out',x.dataset.checkout));
  document.querySelectorAll('[data-key]').forEach(x=>x.onclick=()=>demoKey(x.dataset.key));
+}
+async function issueCheckinPass(id){
+ const target=$('key-'+id); if(!target)return;
+ target.textContent='Creating a 15-minute check-in pass…';
+ const {data,error}=await db.rpc('issue_checkin_pass',{p_booking_id:id});
+ if(error){target.textContent=error.message;return;}
+ // The token is displayed only to the guest who requested it; no guest PII in the QR.
+ const pass='ZD3:'+data.token;
+ target.innerHTML='<div class="alert info">Show this QR to hotel staff. It expires in 15 minutes and can be used once. This is a demo check-in pass, not a room key.</div><div class="qr" id="passqr-'+id+'"></div><div class="key-token" style="overflow-wrap:anywhere;color:#17202a" id="passcode-'+id+'"></div><p>Expires: '+safe(new Date(data.expires_at).toLocaleString())+'</p>';
+ $('passcode-'+id).textContent=pass;
+ new QRCode($('passqr-'+id),{text:pass,width:180,height:180});
 }
 async function changeStatus(fn,id){
  const {error}=await db.rpc(fn,{p_booking_id:id});
@@ -126,6 +139,44 @@ async function loadAdmin(){
  $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span>${safe(b.id.slice(0,8))}</span><span>Room ${safe(rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)}</span><span>${safe(b.check_in)} → ${safe(b.check_out)}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
 }
+async function approvePass(){
+ if(!isAdmin)return toast('Staff access required');
+ const pass=$('staffPass').value.trim();
+ if(!/^ZD3:[0-9a-f-]{36}$/i.test(pass))return $('scanResult').textContent='Enter a valid ZeroDesk check-in QR code.';
+ $('verifyPassBtn').disabled=true;
+ const {data,error}=await db.rpc('staff_checkin_pass',{p_token:pass.slice(4)});
+ $('verifyPassBtn').disabled=false;
+ if(error){$('scanResult').textContent='Check-in rejected: '+error.message;return;}
+ $('scanResult').textContent='Checked in successfully: Room '+data.room_number+' · '+data.room_type+'. Pass used and invalidated.';
+ $('staffPass').value=''; stopScanner(); await loadAdmin();
+}
+$('verifyPassBtn').onclick=approvePass;
+function stopScanner(){
+ if(scanTimer){clearInterval(scanTimer);scanTimer=null;}
+ if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+ $('scanVideo').hidden=true;$('stopScannerBtn').hidden=true;$('startScannerBtn').hidden=false;
+}
+$('stopScannerBtn').onclick=stopScanner;
+$('startScannerBtn').onclick=async()=>{
+ if(!('BarcodeDetector' in window)||!navigator.mediaDevices?.getUserMedia){
+  $('scanResult').textContent='Camera QR scanning is not supported in this browser. Paste the QR pass code instead.';return;
+ }
+ try{
+  const detector=new BarcodeDetector({formats:['qr_code']});
+  scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+  $('scanVideo').srcObject=scanStream;$('scanVideo').hidden=false;
+  $('stopScannerBtn').hidden=false;$('startScannerBtn').hidden=true;
+  scanTimer=setInterval(async()=>{
+   if(scanBusy||$('scanVideo').readyState<2)return;
+   scanBusy=true;
+   try{const codes=await detector.detect($('scanVideo'));
+    const code=codes.find(c=>c.rawValue?.startsWith('ZD3:'));
+    if(code){$('staffPass').value=code.rawValue;stopScanner();await approvePass();}
+   }catch(e){$('scanResult').textContent='Camera scan failed. Paste the code instead.';stopScanner();}
+   finally{scanBusy=false;}
+  },500);
+ }catch(e){stopScanner();$('scanResult').textContent='Camera unavailable or permission denied. Paste the QR pass code instead.';}
+};
 db.auth.onAuthStateChange((event)=>{
  if(event==='PASSWORD_RECOVERY'){
   recoveryMode=true;
