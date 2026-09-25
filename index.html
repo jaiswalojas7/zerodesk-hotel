@@ -5,12 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZeroDesk — Contactless Hotel Check-in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Zero<span>Desk</span></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">Z<span>D</span></span><span class="brand-word">Zero<span>Desk</span></span></div>
     <nav>
       <button class="nav-btn active" data-view="home">Book</button>
       <button class="nav-btn" data-view="booking">My Booking</button>
@@ -24,27 +27,22 @@
   <main class="container">
     <section id="home" class="view active">
       <div class="hero">
-        <div>
-          <p class="eyebrow">CONTACTLESS HOTEL EXPERIENCE</p>
-          <h1>Check in.<br><span>Walk in.</span><br>Relax.</h1>
-          <p class="hero-copy">
-            A student-friendly prototype for a zero-front-desk hotel:
-            booking, pre-check-in, digital key and checkout in one flow.
-          </p>
-          <button class="primary" id="startBooking">Book a Room</button>
+        <div class="hero-photo" role="img" aria-label="Elegant luxury hotel suite"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <p class="eyebrow hero-eyebrow"><span class="eyebrow-line"></span> THE FUTURE OF HOSPITALITY</p>
+          <h1>Arrive in style.<br><em>Stay effortlessly.</em></h1>
+          <p class="hero-copy">An elevated stay starts before you arrive. Explore beautiful rooms, reserve your escape and check in without the wait.</p>
+          <div class="hero-actions"><button class="primary" id="startBooking">Explore our rooms <span aria-hidden="true">↗</span></button><span class="hero-caption">SEAMLESS STAYS · SMARTER ARRIVALS</span></div>
         </div>
-        <div class="hero-card">
-          <div class="hero-icon">⌁</div>
-          <h3>ZeroDesk Pass</h3>
-          <p>Your room key lives on your phone.</p>
-          <div class="status-pill">● Demo mode</div>
-        </div>
+        <div class="hero-bottom"><span>01 / THE ZERODESK EXPERIENCE</span><span>SCROLL TO EXPLORE ↓</span></div>
       </div>
+      <div class="intro-strip"><span>YOUR STAY, REIMAGINED</span><span class="intro-divider"></span><p>Modern comfort meets a seamless digital experience.</p></div>
 
       <div class="section-head">
         <div>
           <p class="eyebrow">HOW IT WORKS</p>
-          <h2>Four steps. No reception queue.</h2>
+          <h2>Every moment, beautifully simple.</h2>
         </div>
       </div>
 
@@ -59,7 +57,7 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">AVAILABLE ROOMS</p>
-            <h2>Choose your room</h2>
+            <h2>Find your perfect stay.</h2><p class="section-subtitle">Thoughtfully selected spaces for every kind of escape.</p>
           </div>
         </div>
         <div id="roomGrid" class="room-grid"></div>
@@ -117,7 +115,7 @@
   </main>
 
   <footer>
-    <p>ZeroDesk demo • Educational prototype • Do not upload real identity documents</p>
+    <div class="footer-brand">Zero<span>Desk</span></div><p>Thoughtful stays. Seamless arrivals.</p><p>Educational prototype · Demo bookings only · No real identity documents or physical door access</p><p class="photo-credit">Hotel imagery: Unsplash</p>
   </footer>
 
   <div id="toast" class="toast"></div>

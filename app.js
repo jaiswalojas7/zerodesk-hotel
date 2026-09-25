@@ -77,7 +77,7 @@ async function loadRooms(){
  const {data,error}=await db.from('rooms').select('id,room_number,room_type,price_per_night,is_active').eq('is_active',true).order('room_number');
  if(error){$('roomGrid').textContent='Could not load rooms: '+error.message;return;}
  rooms=data||[];
- $('roomGrid').innerHTML=rooms.map(r=>`<div class="room-card"><p class="eyebrow">ROOM ${safe(r.room_number)}</p><h3>${safe(r.room_type)}</h3><p class="room-price">${money(r.price_per_night)} / night</p><p class="room-meta">Availability is checked for your selected dates.</p><button class="primary" data-room="${r.id}">Choose Room</button></div>`).join('');
+ $('roomGrid').innerHTML=rooms.map((r,i)=>`<article class="room-card"><div class="room-photo room-photo-${i%3}" role="img" aria-label="Luxury room photograph"><span class="room-photo-label">THE ZERODESK COLLECTION</span></div><div class="room-body"><div class="room-top"><p class="eyebrow">ROOM ${safe(r.room_number)}</p><span class="room-index">0${i+1}</span></div><h3>${safe(r.room_type)}</h3><p class="room-meta">A thoughtfully designed space for your next stay.</p><div class="room-bottom"><div><span class="from-label">STARTING FROM</span><p class="room-price">${money(r.price_per_night)}<small> / night</small></p></div><button class="primary" data-room="${r.id}">View room ↗</button></div></div></article>`).join('');
  $('roomGrid').querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>openForm(Number(b.dataset.room)));
 }
 function openForm(roomId){
