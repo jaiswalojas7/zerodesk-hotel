@@ -87,8 +87,10 @@ module.exports = async (req, res) => {
     );
 
     if (!roomResponse.ok) {
-      throw new Error("Unable to fetch room");
-    }
+  const errorText = await roomResponse.text();
+  console.error("Supabase room fetch failed:", roomResponse.status, errorText);
+  throw new Error(`Unable to fetch room (HTTP ${roomResponse.status})`);
+}
 
     const rooms = await roomResponse.json();
     const room = rooms[0];
