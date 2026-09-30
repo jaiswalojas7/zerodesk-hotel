@@ -53,13 +53,25 @@ module.exports = async (req, res) => {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-    if (!SUPABASE_URL || !SERVICE_KEY || !keyId || !keySecret) {
-      console.error("Booking order configuration is missing.");
+    const configStatus = {
+  SUPABASE_URL: Boolean(SUPABASE_URL),
+  SUPABASE_SERVICE_ROLE_KEY: Boolean(SERVICE_KEY),
+  RAZORPAY_KEY_ID: Boolean(keyId),
+  RAZORPAY_KEY_SECRET: Boolean(keySecret)
+};
 
-      return res.status(500).json({
-        error: "Server configuration missing"
-      });
-    }
+if (
+  !configStatus.SUPABASE_URL ||
+  !configStatus.SUPABASE_SERVICE_ROLE_KEY ||
+  !configStatus.RAZORPAY_KEY_ID ||
+  !configStatus.RAZORPAY_KEY_SECRET
+) {
+  console.error("Booking order configuration status:", configStatus);
+
+  return res.status(500).json({
+    error: "Server configuration missing"
+  });
+}
 
     // Verify the signed-in guest.
     const token = (req.headers.authorization || "")
