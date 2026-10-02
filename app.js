@@ -27,6 +27,15 @@ $('loginBtn').onclick=async()=>{
  const {error}=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});
  if(error) return toast(error.message); toast('Signed in'); await refreshSession(); show('home');
 };
+$('googleLoginBtn').onclick=async()=>{
+ const {error}=await db.auth.signInWithOAuth({
+  provider:'google',
+  options:{
+   redirectTo:location.origin
+  }
+ });
+ if(error) toast(error.message);
+};
 $('registerBtn').onclick=async()=>{
  const email=$('authEmail').value.trim(), password=$('authPassword').value, full_name=$('authName').value.trim();
  if(!full_name||password.length<8)return toast('Enter your name and an 8+ character password');

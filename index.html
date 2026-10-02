@@ -12,10 +12,70 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    .google-login-btn {
+      width: 100%;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border: 1px solid #d9dce3;
+      border-radius: 12px;
+      background: #fff;
+      color: #202124;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .google-login-btn:hover {
+      border-color: #c7cad2;
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+      transform: translateY(-1px);
+    }
+
+    .google-login-btn:active {
+      transform: translateY(0);
+    }
+
+    .google-login-btn svg {
+      flex: 0 0 auto;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 4px;
+      color: #8a8f98;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: #e5e7eb;
+    }
+  </style>
 </head>
+
 <body>
+
   <header class="topbar">
-    <div class="brand"><img src="favicon.png" alt="ZeroDesk ZD logo" class="brand-logo"><span class="brand-word">Zero<span>Desk</span></span></div>
+    <div class="brand">
+      <img src="favicon.png" alt="ZeroDesk ZD logo" class="brand-logo">
+      <span class="brand-word">Zero<span>Desk</span></span>
+    </div>
+
     <nav>
       <button class="nav-btn active" data-view="home">Explore stays</button>
       <button class="nav-btn" data-view="booking">My Booking</button>
@@ -27,87 +87,384 @@
   </header>
 
   <main class="container">
+
     <section id="home" class="view active">
+
       <div class="hero" aria-label="Featured luxury hotel rooms">
         <div class="hero-slide is-active" style="background-image:url('https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1800&q=85')"></div>
         <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1800&q=85')"></div>
         <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1800&q=85')"></div>
+
         <div class="hero-overlay"></div>
-        <div class="hero-content"><span class="hero-tag">WELCOME TO ZERODESK</span><h1>Extraordinary stays.<br><span>Effortless arrivals.</span></h1><p>Discover exceptional rooms, reserve in moments and enjoy a seamless contactless check-in experience.</p><button class="hero-cta" id="startBooking">Explore our rooms <span aria-hidden="true">↗</span></button></div>
-        <div class="hero-dots" aria-label="Featured photo carousel"><button class="hero-dot active" aria-label="Slide 1"></button><button class="hero-dot" aria-label="Slide 2"></button><button class="hero-dot" aria-label="Slide 3"></button></div>
+
+        <div class="hero-content">
+          <span class="hero-tag">WELCOME TO ZERODESK</span>
+          <h1>Extraordinary stays.<br><span>Effortless arrivals.</span></h1>
+          <p>Discover exceptional rooms, reserve in moments and enjoy a seamless contactless check-in experience.</p>
+          <button class="hero-cta" id="startBooking">
+            Explore our rooms <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+
+        <div class="hero-dots" aria-label="Featured photo carousel">
+          <button class="hero-dot active" aria-label="Slide 1"></button>
+          <button class="hero-dot" aria-label="Slide 2"></button>
+          <button class="hero-dot" aria-label="Slide 3"></button>
+        </div>
       </div>
-      <div class="search-wrap"><div class="search-panel"><div class="search-heading"><span>YOUR NEXT STAY STARTS HERE</span><strong>Find your perfect room</strong></div><div class="search-fields"><label class="search-field"><span>CHECK-IN</span><input id="searchCheckin" type="date" aria-label="Check-in date"></label><label class="search-field"><span>CHECK-OUT</span><input id="searchCheckout" type="date" aria-label="Check-out date"></label><label class="search-field"><span>GUESTS</span><select id="searchGuests" aria-label="Number of guests"><option value="1">1 Guest</option><option value="2" selected>2 Guests</option><option value="3">3 Guests</option><option value="4">4 Guests</option></select></label><button id="searchRooms" class="search-button">Search rooms ↗</button></div><p class="search-note">A curated single-hotel experience · Demo reservations · No payment required</p></div></div>
-      <div class="trust-row"><span>✦ Curated luxury stays</span><span>◷ Book in minutes</span><span>▣ Secure QR check-in</span><span>♢ Seamless guest experience</span></div>
+
+      <div class="search-wrap">
+        <div class="search-panel">
+          <div class="search-heading">
+            <span>YOUR NEXT STAY STARTS HERE</span>
+            <strong>Find your perfect room</strong>
+          </div>
+
+          <div class="search-fields">
+            <label class="search-field">
+              <span>CHECK-IN</span>
+              <input id="searchCheckin" type="date" aria-label="Check-in date">
+            </label>
+
+            <label class="search-field">
+              <span>CHECK-OUT</span>
+              <input id="searchCheckout" type="date" aria-label="Check-out date">
+            </label>
+
+            <label class="search-field">
+              <span>GUESTS</span>
+              <select id="searchGuests" aria-label="Number of guests">
+                <option value="1">1 Guest</option>
+                <option value="2" selected>2 Guests</option>
+                <option value="3">3 Guests</option>
+                <option value="4">4 Guests</option>
+              </select>
+            </label>
+
+            <button id="searchRooms" class="search-button">Search rooms ↗</button>
+          </div>
+
+          <p class="search-note">A curated single-hotel experience · Demo reservations · No payment required</p>
+        </div>
+      </div>
+
+      <div class="trust-row">
+        <span>✦ Curated luxury stays</span>
+        <span>◷ Book in minutes</span>
+        <span>▣ Secure QR check-in</span>
+        <span>♢ Seamless guest experience</span>
+      </div>
+
       <div id="roomsSection" class="rooms-section">
         <div class="section-head">
           <div>
             <p class="eyebrow">THE ZERODESK COLLECTION</p>
-            <h2>Rooms worth staying in.</h2><p class="section-subtitle">Thoughtfully curated comfort. Explore every detail with our five-photo room galleries.</p>
+            <h2>Rooms worth staying in.</h2>
+            <p class="section-subtitle">
+              Thoughtfully curated comfort. Explore every detail with our five-photo room galleries.
+            </p>
           </div>
         </div>
-        <div class="filter-row"><button class="filter-chip active" data-filter="all">All rooms</button><button class="filter-chip" data-filter="deluxe">Deluxe</button><button class="filter-chip" data-filter="premium">Premium</button><button class="filter-chip" data-filter="suite">Suites</button></div><div id="roomGrid" class="room-grid"></div>
+
+        <div class="filter-row">
+          <button class="filter-chip active" data-filter="all">All rooms</button>
+          <button class="filter-chip" data-filter="deluxe">Deluxe</button>
+          <button class="filter-chip" data-filter="premium">Premium</button>
+          <button class="filter-chip" data-filter="suite">Suites</button>
+        </div>
+
+        <div id="roomGrid" class="room-grid"></div>
+      </div>
+
+    </section>
+
+
+    <!-- AUTH -->
+    <section id="auth" class="view">
+      <div class="form-card" style="max-width:460px;margin:auto">
+
+        <p class="eyebrow">GUEST ACCOUNT</p>
+
+        <h2>Sign in / Register</h2>
+
+        <p>Use your email to access bookings from any device.</p>
+
+        <!-- Google Sign In -->
+        <div class="google-auth-wrap">
+
+          <button id="googleLoginBtn" type="button" class="google-login-btn">
+
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4"
+                d="M21.35 12.27c0-.68-.06-1.34-.18-1.97H12v3.73h5.24a4.48 4.48 0 0 1-1.95 2.94v2.45h3.15c1.85-1.7 2.91-4.2 2.91-7.15z"/>
+
+              <path fill="#34A853"
+                d="M12 21.75c2.64 0 4.86-.87 6.48-2.33l-3.15-2.45c-.87.58-1.98.93-3.33.93-2.56 0-4.72-1.73-5.5-4.06H3.25v2.53A9.8 9.8 0 0 0 12 21.75z"/>
+
+              <path fill="#FBBC05"
+                d="M6.5 13.84A5.9 5.9 0 0 1 6.19 12c0-.64.11-1.26.31-1.84V7.63H3.25A9.76 9.76 0 0 0 2.25 12c0 1.57.38 3.05 1 4.37l3.25-2.53z"/>
+
+              <path fill="#EA4335"
+                d="M12 6.1c1.44 0 2.74.5 3.76 1.48l2.82-2.82C16.85 3.13 14.63 2.25 12 2.25a9.8 9.8 0 0 0-8.75 5.38L6.5 10.16C7.28 7.83 9.44 6.1 12 6.1z"/>
+            </svg>
+
+            <span>Continue with Google</span>
+
+          </button>
+
+          <div class="auth-divider" aria-hidden="true">
+            <span>OR</span>
+          </div>
+
+        </div>
+
+
+        <!-- Normal Email Login -->
+        <div class="field">
+          <label>Full name (for registration)</label>
+          <input
+            id="authName"
+            autocomplete="name"
+            placeholder="Your name">
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input
+            id="authEmail"
+            type="email"
+            autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label>Password (minimum 8 characters)</label>
+          <input
+            id="authPassword"
+            type="password"
+            autocomplete="current-password">
+        </div>
+
+        <div class="form-actions">
+          <button class="primary" id="loginBtn">Sign in</button>
+          <button class="secondary" id="registerBtn">Create account</button>
+        </div>
+
+        <p>
+          <button class="text-action" id="forgotPasswordBtn" type="button">
+            Forgot password?
+          </button>
+        </p>
+
+        <div id="authMessage" class="alert info" aria-live="polite">
+          Check your email after registering.
+        </div>
+
       </div>
     </section>
 
-    <section id="auth" class="view"><div class="form-card" style="max-width:460px;margin:auto"><p class="eyebrow">GUEST ACCOUNT</p><h2>Sign in / Register</h2><p>Use your email to access bookings from any device.</p><div class="field"><label>Full name (for registration)</label><input id="authName" autocomplete="name" placeholder="Your name"></div><div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="email"></div><div class="field"><label>Password (minimum 8 characters)</label><input id="authPassword" type="password" autocomplete="current-password"></div><div class="form-actions"><button class="primary" id="loginBtn">Sign in</button><button class="secondary" id="registerBtn">Create account</button></div><p><button class="text-action" id="forgotPasswordBtn" type="button">Forgot password?</button></p><div id="authMessage" class="alert info" aria-live="polite">Check your email after registering.</div></div></section>
 
+    <!-- PASSWORD -->
     <section id="password" class="view">
       <div class="form-card" style="max-width:460px;margin:auto">
+
         <p class="eyebrow">ACCOUNT SECURITY</p>
+
         <h2 id="passwordTitle">Set a new password</h2>
-        <p id="passwordHelp">Choose a new password for your ZeroDesk account.</p>
-        <div class="field"><label for="newPassword">New password (at least 8 characters)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8"></div>
-        <div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8"></div>
-        <button class="primary" id="updatePasswordBtn">Update password</button>
-        <div id="passwordMessage" class="alert info" aria-live="polite">Use a unique password you have not used before.</div>
+
+        <p id="passwordHelp">
+          Choose a new password for your ZeroDesk account.
+        </p>
+
+        <div class="field">
+          <label for="newPassword">New password (at least 8 characters)</label>
+          <input
+            id="newPassword"
+            type="password"
+            autocomplete="new-password"
+            minlength="8">
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm new password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            minlength="8">
+        </div>
+
+        <button class="primary" id="updatePasswordBtn">
+          Update password
+        </button>
+
+        <div id="passwordMessage" class="alert info" aria-live="polite">
+          Use a unique password you have not used before.
+        </div>
+
       </div>
     </section>
 
+
+    <!-- BOOKING -->
     <section id="booking" class="view">
+
       <div class="section-head">
         <div>
           <p class="eyebrow">GUEST PORTAL</p>
           <h2 id="bookingTitle">My Booking</h2>
         </div>
       </div>
+
       <div id="bookingContent"></div>
+
     </section>
 
+
+    <!-- ADMIN -->
     <section id="admin" class="view">
+
       <div class="section-head">
         <div>
           <p class="eyebrow">HOTEL OPERATIONS</p>
           <h2>Admin Dashboard</h2>
         </div>
+
         <span class="badge">Authorized staff only</span>
       </div>
+
       <div class="admin-panel" id="staffScanner">
-        <h3>Staff QR Check-in</h3><p>Scan a guest's short-lived QR pass or paste its code. Staff authorization is checked by Supabase.</p>
-        <div class="field"><label for="staffPass">Guest QR pass</label><input id="staffPass" placeholder="ZD3:..." autocomplete="off"></div>
-        <div class="form-actions"><button class="primary" id="verifyPassBtn">Verify &amp; check in</button><button class="secondary" id="startScannerBtn">Scan with camera</button><button class="secondary" id="stopScannerBtn" hidden>Stop camera</button></div>
-        <video id="scanVideo" autoplay playsinline muted hidden style="max-width:100%;width:420px;border-radius:12px;margin-top:12px"></video>
-        <div id="scanResult" class="alert info" role="status" aria-live="polite">Only staff with admin access can approve check-in.</div>
-      </div><div class="stats" id="stats"></div>
+
+        <h3>Staff QR Check-in</h3>
+
+        <p>
+          Scan a guest's short-lived QR pass or paste its code.
+          Staff authorization is checked by Supabase.
+        </p>
+
+        <div class="field">
+          <label for="staffPass">Guest QR pass</label>
+          <input
+            id="staffPass"
+            placeholder="ZD3:..."
+            autocomplete="off">
+        </div>
+
+        <div class="form-actions">
+          <button class="primary" id="verifyPassBtn">
+            Verify &amp; check in
+          </button>
+
+          <button class="secondary" id="startScannerBtn">
+            Scan with camera
+          </button>
+
+          <button class="secondary" id="stopScannerBtn" hidden>
+            Stop camera
+          </button>
+        </div>
+
+        <video
+          id="scanVideo"
+          autoplay
+          playsinline
+          muted
+          hidden
+          style="max-width:100%;width:420px;border-radius:12px;margin-top:12px">
+        </video>
+
+        <div
+          id="scanResult"
+          class="alert info"
+          role="status"
+          aria-live="polite">
+          Only staff with admin access can approve check-in.
+        </div>
+
+      </div>
+
+      <div class="stats" id="stats"></div>
+
       <div class="admin-panel">
         <h3>Bookings</h3>
         <div id="adminBookings"></div>
       </div>
+
       <div class="admin-panel">
         <h3>Room Status</h3>
         <div id="adminRooms" class="admin-room-grid"></div>
       </div>
+
     </section>
+
   </main>
 
+
   <footer>
-    <div class="footer-brand">Zero<span>Desk</span></div><p>Thoughtful stays. Seamless arrivals.</p><p>Educational prototype · Demo bookings only · No real identity documents or physical door access</p><p class="photo-credit">Hotel imagery: Unsplash · Photos are illustrative, not actual room photographs.</p>
+    <div class="footer-brand">Zero<span>Desk</span></div>
+
+    <p>Thoughtful stays. Seamless arrivals.</p>
+
+    <p>
+      Educational prototype · Demo bookings only · No real identity documents or physical door access
+    </p>
+
+    <p class="photo-credit">
+      Hotel imagery: Unsplash · Photos are illustrative, not actual room photographs.
+    </p>
   </footer>
 
-  <div id="galleryModal" class="gallery-modal" hidden role="dialog" aria-modal="true" aria-label="Room photo gallery"><div class="gallery-dialog"><button id="closeGallery" class="gallery-close" aria-label="Close gallery">×</button><img id="galleryImage" alt="Hotel room photograph"><div class="gallery-bottom"><button id="galleryPrev" aria-label="Previous photo">←</button><span id="galleryCounter">1 / 5</span><button id="galleryNext" aria-label="Next photo">→</button></div><div id="galleryThumbs" class="gallery-thumbs"></div></div></div>
+
+  <div
+    id="galleryModal"
+    class="gallery-modal"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-label="Room photo gallery">
+
+    <div class="gallery-dialog">
+
+      <button
+        id="closeGallery"
+        class="gallery-close"
+        aria-label="Close gallery">
+        ×
+      </button>
+
+      <img
+        id="galleryImage"
+        alt="Hotel room photograph">
+
+      <div class="gallery-bottom">
+
+        <button
+          id="galleryPrev"
+          aria-label="Previous photo">
+          ←
+        </button>
+
+        <span id="galleryCounter">1 / 5</span>
+
+        <button
+          id="galleryNext"
+          aria-label="Next photo">
+          →
+        </button>
+
+      </div>
+
+      <div id="galleryThumbs" class="gallery-thumbs"></div>
+
+    </div>
+  </div>
+
+
   <div id="toast" class="toast"></div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="config.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>
