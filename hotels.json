@@ -11,7 +11,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/eb65e940-5f99-4e6c-88f1-56dcb82a9e26.jpg"
+    "photo": "https://gos3.ibcdn.com/eb65e940-5f99-4e6c-88f1-56dcb82a9e26.jpg",
+    "checkoutCode": "ZDT-TAJ-LAKE-PALACE",
+    "testRate": 24000
   },
   {
     "city": "Delhi",
@@ -25,7 +27,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/28ea220af52311e794f3025f77df004f.jpg"
+    "photo": "https://gos3.ibcdn.com/28ea220af52311e794f3025f77df004f.jpg",
+    "checkoutCode": "ZDT-ITC-MAURYA",
+    "testRate": 11500
   },
   {
     "city": "Jodhpur",
@@ -39,7 +43,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/3a9e41cc-ac83-460e-a737-bed840cb0d38.jpg"
+    "photo": "https://gos3.ibcdn.com/3a9e41cc-ac83-460e-a737-bed840cb0d38.jpg",
+    "checkoutCode": "ZDT-UMAID-BHAWAN-PALACE",
+    "testRate": 26000
   },
   {
     "city": "Mumbai",
@@ -53,7 +59,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://hblimg.mmtcdn.com/content/hubble/img/activity-img/mmt/activities/m_taj_mahal_mumbai_signature_suite_living_room_l_1120_1400.jpg"
+    "photo": "https://hblimg.mmtcdn.com/content/hubble/img/activity-img/mmt/activities/m_taj_mahal_mumbai_signature_suite_living_room_l_1120_1400.jpg",
+    "checkoutCode": "ZDT-THE-TAJ-MAHAL-PALACE",
+    "testRate": 32500
   },
   {
     "city": "Pune",
@@ -67,7 +75,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://cache.marriott.com/content/dam/marriott-renditions/PNQMD/pnqmd-facing-7109-hor-wide.jpg?output-quality=70&interpolation=progressive-bilinear&downsize=1336px:*"
+    "photo": "https://cache.marriott.com/content/dam/marriott-renditions/PNQMD/pnqmd-facing-7109-hor-wide.jpg?output-quality=70&interpolation=progressive-bilinear&downsize=1336px:*",
+    "checkoutCode": "ZDT-SHERATON-GRAND-PUNE-BUND-GARDEN-HOTEL",
+    "testRate": 7900
   },
   {
     "city": "Mumbai",
@@ -81,7 +91,9 @@
     "mode": "day",
     "couples": true,
     "localId": false,
-    "photo": "https://gos3.ibcdn.com/752adab2727e11ea81e60242ac110002.jpg"
+    "photo": "https://gos3.ibcdn.com/752adab2727e11ea81e60242ac110002.jpg",
+    "checkoutCode": "ZDT-ITC-GRAND-CENTRAL",
+    "testRate": 10900
   },
   {
     "city": "Delhi",
@@ -95,7 +107,9 @@
     "source": "https://www.brevistay.com/hotels/hotel-ambience-in-delhi-8366",
     "photo": "https://htlimages.brevistay.com/8366/20260430/1.jpg",
     "couples": true,
-    "localId": true
+    "localId": true,
+    "checkoutCode": "ZDT-HOTEL-AMBIENCE",
+    "testRate": 350
   },
   {
     "city": "Mumbai",
@@ -109,7 +123,9 @@
     "source": "https://www.brevistay.com/hotels/hotel-sahar-garden-in-mumbai-743",
     "photo": "https://htlimages.brevistay.com/743/20250707/1.jpg",
     "couples": true,
-    "localId": true
+    "localId": true,
+    "checkoutCode": "ZDT-HOTEL-SAHAR-GARDEN",
+    "testRate": 475
   },
   {
     "city": "Pune",
@@ -123,7 +139,9 @@
     "source": "https://www.brevistay.com/hotels/hotel-studio-estique-in-pune-11696",
     "photo": "https://htlimages.brevistay.com/11696/20260407/1.jpg",
     "couples": true,
-    "localId": true
+    "localId": true,
+    "checkoutCode": "ZDT-HOTEL-STUDIO-ESTIQUE",
+    "testRate": 525
   },
   {
     "city": "Jodhpur",
@@ -137,7 +155,9 @@
     "source": "https://www.brevistay.com/hotels/stamps-by-eight-continents-jodhpur-in-jodhpur-12271",
     "photo": "https://htlimages.brevistay.com/12271/20260417/1.jpg",
     "couples": false,
-    "localId": null
+    "localId": null,
+    "checkoutCode": "ZDT-STAMPS-BY-EIGHT-CONTINENTS",
+    "testRate": 450
   },
   {
     "city": "Udaipur",
@@ -151,7 +171,9 @@
     "source": "https://www.brevistay.com/hotels/hotel-ace-plaza-in-udaipur-6151",
     "photo": "https://htlimages.brevistay.com/6151/20240516/1.jpg",
     "couples": true,
-    "localId": true
+    "localId": true,
+    "checkoutCode": "ZDT-HOTEL-ACE-PLAZA",
+    "testRate": 300
   },
   {
     "city": "Mumbai",
@@ -165,7 +187,9 @@
     "mode": "day",
     "couples": true,
     "localId": false,
-    "photo": "https://gos3.ibcdn.com/87402574c37f11eb84af0242ac110002.jpg"
+    "photo": "https://gos3.ibcdn.com/87402574c37f11eb84af0242ac110002.jpg",
+    "checkoutCode": "ZDT-ITC-MARATHA",
+    "testRate": 12500
   },
   {
     "city": "Jaipur",
@@ -179,7 +203,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/91a3dc30116e11ecae250a58a9feac02.jpg"
+    "photo": "https://gos3.ibcdn.com/91a3dc30116e11ecae250a58a9feac02.jpg",
+    "checkoutCode": "ZDT-ITC-RAJPUTANA",
+    "testRate": 9500
   },
   {
     "city": "Chennai",
@@ -193,7 +219,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/12c21874a99311e79b9c0a9df65c8753.jpg"
+    "photo": "https://gos3.ibcdn.com/12c21874a99311e79b9c0a9df65c8753.jpg",
+    "checkoutCode": "ZDT-ITC-GRAND-CHOLA",
+    "testRate": 11900
   },
   {
     "city": "Kolkata",
@@ -207,7 +235,9 @@
     "mode": "day",
     "couples": false,
     "localId": true,
-    "photo": "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201904151217428716-2b66389243f611ea8dfe0242ac110002.jpg"
+    "photo": "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201904151217428716-2b66389243f611ea8dfe0242ac110002.jpg",
+    "checkoutCode": "ZDT-ITC-ROYAL-BENGAL",
+    "testRate": 11400
   },
   {
     "city": "Hyderabad",
@@ -221,7 +251,9 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/6e513098600a11e89a9702ab50735238.jpg"
+    "photo": "https://gos3.ibcdn.com/6e513098600a11e89a9702ab50735238.jpg",
+    "checkoutCode": "ZDT-ITC-KOHENUR",
+    "testRate": 10300
   },
   {
     "city": "Bengaluru",
@@ -235,6 +267,8 @@
     "mode": "day",
     "couples": true,
     "localId": true,
-    "photo": "https://gos3.ibcdn.com/5a9141f8a90111e7b13f02c16acac17e.jpg"
+    "photo": "https://gos3.ibcdn.com/5a9141f8a90111e7b13f02c16acac17e.jpg",
+    "checkoutCode": "ZDT-ITC-WINDSOR",
+    "testRate": 9800
   }
 ]

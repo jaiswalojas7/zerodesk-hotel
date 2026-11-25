@@ -62,7 +62,7 @@ function renderHotels() {
   target.replaceChildren();
   byId('hotelHeading').textContent = (mode === 'hourly' ? 'Hourly stays' : 'Hotels') + ' in ' + (city.value || 'India');
   byId('hotelCount').textContent = results.length + (results.length === 1 ? ' property' : ' properties') +
-    (mode === 'hourly' ? ' · Select a room to check the provider’s time slots.' : ' · Select a room for rates and availability.');
+    (mode === 'hourly' ? ' · Choose a time and duration to see your total.' : ' · Select a room for rates and availability.');
   for (const hotel of results) {
     const card = node('article', null, 'property-card');
     const figure = node('figure');
@@ -75,7 +75,7 @@ function renderHotels() {
       figure.append(img);
       if (!hotel.photo && scene) {
         const credit = node('figcaption');
-        credit.append(scene.topic + ' · ', ...creditLinks(scene));
+        credit.textContent = scene.topic;
         figure.append(credit);
       }
     }
@@ -91,27 +91,14 @@ function renderHotels() {
       if (!validSearch()) return;
       showDetails(hotel);
     };
-    body.append(location, title, room, description, policy, book);
+    const rate = node('strong', rupees(hotel.testRate) + (mode === 'hourly' ? ' / hour' : ' / night') + ' · Test rate');
+    body.append(location, title, room, description, rate, policy, book);
     card.append(figure, body);
     target.append(card);
   }
   if (!results.length) target.append(node('p', 'No matching hotels. Change the city or clear the couple-friendly filter.'));
 }
-function providerUrl(hotel) {
-  const url = new URL(hotel.booking);
-  if (mode === 'hourly') {
-    url.searchParams.set('date', arrival.value);
-    url.searchParams.set('time', byId('arrivalHour').value);
-    url.searchParams.set('rooms', '1');
-    url.searchParams.set('adults', '2');
-  } else {
-    const format = value => value.slice(5, 7) + value.slice(8) + value.slice(0, 4);
-    url.searchParams.set('checkin', format(arrival.value));
-    url.searchParams.set('checkout', format(departure.value));
-    url.searchParams.set('roomStayQualifier', '2e0e');
-  }
-  return url.href;
-}
+const rupees = value => new Intl.NumberFormat('en-IN', {style:'currency', currency:'INR', maximumFractionDigits:0}).format(value);
 function showDetails(hotel) {
   byId('detailCity').textContent = hotel.city;
   byId('detailProperty').textContent = hotel.name;
@@ -130,10 +117,18 @@ function showDetails(hotel) {
   const formatTime = ms => new Intl.DateTimeFormat('en-IN', {timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(ms);
   byId('detailStay').textContent = hourly ? formatTime(startTime()) + ' – ' + formatTime(startTime() + hours * 3600000) + ' IST · ' + hours + (hours === 1 ? ' hour requested' : ' hours requested')
     : arrival.value + ' → ' + departure.value + ' · ' + (Date.parse(departure.value) - Date.parse(arrival.value)) / 86400000 + ' night(s)';
-  byId('providerNote').textContent = hourly ? 'Brevistay confirms available blocks and prices. Compare your requested duration with the paid slot before booking; shorter visits may require a longer paid block.'
-    : 'MakeMyTrip confirms the room category, dates, final rate and cancellation terms at checkout.';
-  byId('providerBook').href = providerUrl(hotel);
-  byId('providerBook').textContent = hourly ? 'See time slots on Brevistay ↗' : 'See rates on MakeMyTrip ↗';
+  const units = hourly ? hours : (Date.parse(departure.value) - Date.parse(arrival.value)) / 86400000;
+  const total = units * hotel.testRate;
+  const pay = byId('catalogPay');
+  pay.textContent = 'Pay ' + rupees(total) + ' with Razorpay';
+  byId('providerNote').textContent = rupees(hotel.testRate) + (hourly ? ' per hour' : ' per night') + ' × ' + units + ' = ' + rupees(total) + '. Sample price, test payment and ZeroDesk demo QR. This does not reserve a room with the hotel.';
+  pay.onclick = () => {
+    if (!validSearch()) return;
+    if (!currentUser) { dialog.close(); show('auth'); toast('Sign in to pay for your stay'); return; }
+    reserve(null, {catalogCode:hotel.checkoutCode, checkIn:arrival.value, checkOut:hourly ? null : departure.value,
+      startHour:hourly ? Number(byId('arrivalHour').value) : null, hours:hourly ? hours : null,
+      expectedPaise:total * 100}, pay);
+  };
   byId('roomSource').href = hotel.source;
   byId('ruleSource').href = hotel.booking;
   configureRequest(hotel);
@@ -156,13 +151,6 @@ byId('cityForm').onsubmit = event => {
   }
 };
 
-function creditLinks(photo) {
-  const file = node('a', photo.credit);
-  file.href = photo.file;
-  const license = node('a', 'CC ' + photo.license.replace('/', ' ').toUpperCase());
-  license.href = 'https://creativecommons.org/licenses/' + photo.license + '/';
-  return [file, ' · ', license];
-}
 function slideshow(photos) {
   let index = 0;
   let version = 0;
@@ -186,7 +174,6 @@ function slideshow(photos) {
       hero.alt = photo.title;
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) hero.animate([{opacity:.6},{opacity:1}], {duration:500});
       byId('sceneCaption').textContent = photo.topic;
-      byId('sceneCredit').replaceChildren(...creditLinks(photo));
       return;
     }
   }
