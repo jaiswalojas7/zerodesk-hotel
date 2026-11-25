@@ -22,7 +22,7 @@ function show(view, load=true){
  window.scrollTo(0,0);
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
-$('startBooking').onclick=()=>$('roomsSection').scrollIntoView({behavior:'smooth'});
+
 $('loginBtn').onclick=async()=>{
  const {error}=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});
  if(error) return toast(error.message); toast('Signed in'); await refreshSession(); show('home');
@@ -90,12 +90,21 @@ const roomPhotos = [
 ];
 const roomImage=(idx,photo=0,width=1000)=>`https://images.unsplash.com/${roomPhotos[idx%3][photo]}?auto=format&fit=crop&w=${width}&q=82`;
 let activeRoomFilter='all', galleryRoom=0, galleryPhoto=0, selectedDates={};
-function filteredRooms(){return rooms.filter(r=>activeRoomFilter==='all'||r.room_type.toLowerCase().includes(activeRoomFilter));}
+let availableIds = null;
+function filteredRooms() {
+ const result = rooms.filter(room =>
+  (availableIds === null || availableIds.has(String(room.id))) &&
+  (activeRoomFilter === 'all' || room.room_type.toLowerCase().includes(activeRoomFilter))
+ );
+ const sort = $('roomSort').value;
+ if (sort !== 'default') result.sort((a, b) => (a.price_per_night - b.price_per_night) * (sort === 'low' ? 1 : -1));
+ return result;
+}
 function drawRooms(){
  const selected=filteredRooms();
  $('roomGrid').innerHTML=selected.length?selected.map(r=>{
  const i=rooms.indexOf(r);
- return `<article class="room-card"><div class="room-photo-wrap"><img class="room-photo-img" src="${roomImage(i)}" alt="Illustrative photograph for ${safe(r.room_type)}" loading="lazy"><span class="photo-count">▧ 5 PHOTOS</span><button class="photo-view" data-gallery="${i}" aria-label="View five photos of ${safe(r.room_type)}">View gallery ↗</button></div><div class="room-body"><div class="room-top"><span class="room-type">ROOM ${safe(r.room_number)}</span><span class="room-available">● Available to book</span></div><h3>${safe(r.room_type)}</h3><p class="room-meta">✦ Premium comfort &nbsp; · &nbsp; ◉ Complimentary Wi-Fi &nbsp; · &nbsp; ♧ Thoughtful amenities</p><div class="room-bottom"><div><span class="from-label">STARTING FROM</span><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><span class="tax-note">Room price · Secure payment via Razorpay</span></div><button class="primary" data-room="${r.id}">Book this room →</button></div></div></article>`;
+ return `<article class="room-card"><div class="room-photo-wrap"><img class="room-photo-img" src="${roomImage(i)}" alt="Illustrative photograph for ${safe(r.room_type)}" loading="lazy"><span class="photo-count">▧ 5 PHOTOS</span><button class="photo-view" data-gallery="${i}" aria-label="View five photos of ${safe(r.room_type)}">View gallery ↗</button></div><div class="room-body"><div class="room-top"><span class="room-type">ROOM ${safe(r.room_number)}</span><span class="room-available">${availableIds ? "Available for your dates" : "Check dates"}</span></div><h3>${safe(r.room_type)}</h3><p class="room-meta">Illustrative room gallery · Rate per night</p><div class="room-bottom"><div><span class="from-label">STARTING FROM</span><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><span class="tax-note">Room price · Secure payment via Razorpay</span></div><button class="primary" data-room="${r.id}">Book this room →</button></div></div></article>`;
  }).join(''):'<p class="empty">No rooms match this filter.</p>';
  $('roomGrid').querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>openForm(Number(b.dataset.room)));
  $('roomGrid').querySelectorAll('[data-gallery]').forEach(b=>b.onclick=()=>openGallery(Number(b.dataset.gallery)));
@@ -110,9 +119,18 @@ function openForm(roomId){
  const r=rooms.find(x=>x.id===roomId);if(!r)return;
  const i=rooms.indexOf(r);
  show('booking',false);
- $('bookingContent').innerHTML=`<div class="form-layout"><div class="form-card"><p class="eyebrow">YOUR RESERVATION</p><h3>${safe(r.room_type)} · Room ${safe(r.room_number)}</h3><p>Choose your stay dates and confirm your reservation.</p><div class="field"><label for="checkinDate">Check-in</label><input id="checkinDate" type="date" min="${today()}" value="${selectedDates.checkin||today()}"></div><div class="field"><label for="checkoutDate">Check-out</label><input id="checkoutDate" type="date" min="${today()}" value="${selectedDates.checkout||''}"></div><div class="alert info">Payments are processed via Razorpay. QR check-in and smart locks are for demonstration only. No real ID verification is performed.</div><button class="primary" id="reserveBtn"> Proceed to payment → </button></div><div class="summary-card booking-summary"><img src="${roomImage(i)}" alt="Illustrative room photograph"><div class="summary-padding"><span class="eyebrow">YOUR SELECTED ROOM</span><h3>${safe(r.room_type)}</h3><p>Room ${safe(r.room_number)}</p><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><p>Secure booking · Contactless QR check-in</p></div></div></div>`;
+ $('bookingContent').innerHTML=`<div class="form-layout"><div class="form-card"><p class="eyebrow">YOUR RESERVATION</p><h3>${safe(r.room_type)} · Room ${safe(r.room_number)}</h3><p>Choose your dates to see the estimated room total.</p><div class="field"><label for="checkinDate">Check-in</label><input id="checkinDate" type="date" min="${today()}" value="${selectedDates.checkin||today()}"></div><div class="field"><label for="checkoutDate">Check-out</label><input id="checkoutDate" type="date" min="${today()}" value="${selectedDates.checkout||''}"></div><p id="stayEstimate" role="status"></p><div class="alert info">Checkout uses Razorpay test mode. QR check-in and smart locks are for demonstration only. No real ID verification is performed.</div><button class="primary" id="reserveBtn"> Proceed to payment → </button></div><div class="summary-card booking-summary"><img src="${roomImage(i)}" alt="Illustrative room photograph"><div class="summary-padding"><span class="eyebrow">YOUR SELECTED ROOM</span><h3>${safe(r.room_type)}</h3><p>Room ${safe(r.room_number)}</p><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><p>Secure booking · Contactless QR check-in</p></div></div></div>`;
  $('checkinDate').onchange=()=>{selectedDates.checkin=$('checkinDate').value;$('checkoutDate').min=selectedDates.checkin;};
  $('checkoutDate').onchange=()=>{selectedDates.checkout=$('checkoutDate').value;};
+ const updateEstimate = () => {
+  const nights = (Date.parse($('checkoutDate').value) - Date.parse($('checkinDate').value)) / 86400000;
+  $('stayEstimate').textContent = nights > 0
+   ? nights + (nights === 1 ? ' night · ' : ' nights · ') + money(nights * r.price_per_night) + ' estimated room total'
+   : '';
+ };
+ $('checkinDate').addEventListener('input', updateEstimate);
+ $('checkoutDate').addEventListener('input', updateEstimate);
+ updateEstimate();
  $('reserveBtn').onclick=()=>reserve(r.id);
 }
 function openGallery(i){galleryRoom=i;galleryPhoto=0;$('galleryModal').hidden=false;document.body.classList.add('modal-open');renderGallery();}
@@ -130,19 +148,54 @@ $('galleryNext').onclick=()=>{galleryPhoto=(galleryPhoto+1)%5;renderGallery();};
 $('galleryModal').addEventListener('click',e=>{if(e.target===$('galleryModal'))closeGallery();});
 document.addEventListener('keydown',e=>{if($('galleryModal').hidden)return;if(e.key==='Escape')closeGallery();if(e.key==='ArrowRight')$('galleryNext').click();if(e.key==='ArrowLeft')$('galleryPrev').click();});
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{activeRoomFilter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));drawRooms();});
-$('searchCheckin').min=today();$('searchCheckout').min=today();
-$('searchCheckin').onchange=()=>{$('searchCheckout').min=$('searchCheckin').value;};
-$('searchRooms').onclick=()=>{
- const a=$('searchCheckin').value,b=$('searchCheckout').value;
- if(!a||!b||b<=a)return toast('Select valid check-in and check-out dates');
- selectedDates={checkin:a,checkout:b};
- $('roomsSection').scrollIntoView({behavior:'smooth'});
- toast('Select a room to continue your reservation');
+let searchVersion = 0;
+const checkin = $('searchCheckin');
+const checkoutDate = $('searchCheckout');
+checkin.min = today();
+checkoutDate.min = today();
+function resetAvailability() {
+ searchVersion++;
+ availableIds = null;
+ selectedDates = {};
+ $('clearDates').hidden = true;
+ $('roomResult').textContent = 'Choose dates to see which rooms are available.';
+ drawRooms();
+}
+checkin.oninput = () => {
+ resetAvailability();
+ checkoutDate.min = checkin.value || today();
 };
-let heroSlide=0;const slides=[...document.querySelectorAll('.hero-slide')],dots=[...document.querySelectorAll('.hero-dot')];
-function setHeroSlide(n){heroSlide=n;slides.forEach((el,i)=>el.classList.toggle('is-active',i===n));dots.forEach((el,i)=>el.classList.toggle('active',i===n));}
-dots.forEach((dot,i)=>dot.onclick=()=>setHeroSlide(i));
-if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)setInterval(()=>{if(document.visibilityState==='visible')setHeroSlide((heroSlide+1)%slides.length);},5500);
+checkoutDate.oninput = resetAvailability;
+$('roomSort').onchange = drawRooms;
+$('clearDates').onclick = () => {
+ $('staySearch').reset();
+ checkoutDate.min = today();
+ resetAvailability();
+};
+$('staySearch').onsubmit = async event => {
+ event.preventDefault();
+ const checkIn = checkin.value, checkOut = checkoutDate.value;
+ if (checkIn < today() || checkOut <= checkIn) return toast('Check-out must follow check-in. Choose current or future dates.');
+ const version = ++searchVersion;
+ $('roomResult').textContent = 'Checking room availability…';
+ $('roomsSection').scrollIntoView({behavior:'smooth'});
+ try {
+  const params = new URLSearchParams({checkIn, checkOut});
+  const response = await fetch('/api/availability?' + params);
+  if (!response.ok) throw new Error('Availability unavailable');
+  const {roomIds} = await response.json();
+  if (version !== searchVersion) return;
+  availableIds = new Set(roomIds.map(String));
+  selectedDates = {checkin:checkIn, checkout:checkOut};
+  $('clearDates').hidden = false;
+  $('roomResult').textContent = roomIds.length + ' available for ' + checkIn + ' → ' + checkOut + ' across all room types.';
+  drawRooms();
+ } catch {
+  if (version !== searchVersion) return;
+  resetAvailability();
+  $('roomResult').textContent = 'Availability could not be checked. Showing the room catalogue. Please retry.';
+ }
+};
 async function reserve(roomId) {
   const checkIn = $('checkinDate').value;
   const checkOut = $('checkoutDate').value;

@@ -78,7 +78,7 @@
 
     <nav>
       <button class="nav-btn active" data-view="home">Explore stays</button>
-      <button class="nav-btn" data-view="booking">My Booking</button>
+      <button class="nav-btn" data-view="booking">My bookings</button>
       <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
       <button class="nav-btn" data-view="auth" id="authNav">Sign in</button>
       <button class="secondary" id="changePasswordNav" hidden>Change password</button>
@@ -90,93 +90,29 @@
 
     <section id="home" class="view active">
 
-      <div class="hero" aria-label="Featured luxury hotel rooms">
-        <div class="hero-slide is-active" style="background-image:url('https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1800&q=85')"></div>
-        <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1800&q=85')"></div>
-        <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1800&q=85')"></div>
-
-        <div class="hero-overlay"></div>
-
-        <div class="hero-content">
-          <span class="hero-tag">WELCOME TO ZERODESK</span>
-          <h1>Extraordinary stays.<br><span>Effortless arrivals.</span></h1>
-          <p>Discover exceptional rooms, reserve in moments and enjoy a seamless contactless check-in experience.</p>
-          <button class="hero-cta" id="startBooking">
-            Explore our rooms <span aria-hidden="true">↗</span>
-          </button>
+      <div class="india-hero">
+        <img class="lake-scene" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/The_TAJ_Lake_Palace,_Udaipur.jpg/1280px-The_TAJ_Lake_Palace,_Udaipur.jpg" alt="Taj Lake Palace on Lake Pichola in Udaipur" fetchpriority="high" width="1280" height="621">
+        <div class="india-copy"><p class="kicker">THE INDIA EDIT</p><h1>Palaces by water.<br><em>Stays to remember.</em></h1>
+          <a class="editorial-link" href="#hotelGuide">Explore the hotel guide <span aria-hidden="true">↘</span></a>
         </div>
-
-        <div class="hero-dots" aria-label="Featured photo carousel">
-          <button class="hero-dot active" aria-label="Slide 1"></button>
-          <button class="hero-dot" aria-label="Slide 2"></button>
-          <button class="hero-dot" aria-label="Slide 3"></button>
-        </div>
+        <span class="place-caption">Taj Lake Palace <small>Udaipur, Rajasthan</small></span>
       </div>
-
-      <div class="search-wrap">
-        <div class="search-panel">
-          <div class="search-heading">
-            <span>YOUR NEXT STAY STARTS HERE</span>
-            <strong>Find your perfect room</strong>
-          </div>
-
-          <div class="search-fields">
-            <label class="search-field">
-              <span>CHECK-IN</span>
-              <input id="searchCheckin" type="date" aria-label="Check-in date">
-            </label>
-
-            <label class="search-field">
-              <span>CHECK-OUT</span>
-              <input id="searchCheckout" type="date" aria-label="Check-out date">
-            </label>
-
-            <label class="search-field">
-              <span>GUESTS</span>
-              <select id="searchGuests" aria-label="Number of guests">
-                <option value="1">1 Guest</option>
-                <option value="2" selected>2 Guests</option>
-                <option value="3">3 Guests</option>
-                <option value="4">4 Guests</option>
-              </select>
-            </label>
-
-            <button id="searchRooms" class="search-button">Search rooms ↗</button>
-          </div>
-
-          <p class="search-note">A curated single-hotel experience · Demo reservations · No payment required</p>
-        </div>
-      </div>
-
-      <div class="trust-row">
-        <span>✦ Curated luxury stays</span>
-        <span>◷ Book in minutes</span>
-        <span>▣ Secure QR check-in</span>
-        <span>♢ Seamless guest experience</span>
-      </div>
-
-      <div id="roomsSection" class="rooms-section">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">THE ZERODESK COLLECTION</p>
-            <h2>Rooms worth staying in.</h2>
-            <p class="section-subtitle">
-              Thoughtfully curated comfort. Explore every detail with our five-photo room galleries.
-            </p>
-          </div>
-        </div>
-
-        <div class="filter-row">
-          <button class="filter-chip active" data-filter="all">All rooms</button>
-          <button class="filter-chip" data-filter="deluxe">Deluxe</button>
-          <button class="filter-chip" data-filter="premium">Premium</button>
-          <button class="filter-chip" data-filter="suite">Suites</button>
-        </div>
-
+      <section class="stay-search" aria-labelledby="searchTitle">
+        <div><p class="eyebrow">ZERODESK RESERVATIONS</p><h2 id="searchTitle">Find a room</h2></div>
+        <form id="staySearch"><label>Check-in<input id="searchCheckin" type="date" required></label>
+        <label>Check-out<input id="searchCheckout" type="date" required></label>
+        <button class="primary" type="submit" id="searchRooms">Check availability →</button></form>
+      </section>
+      <section id="roomsSection" class="rooms-section">
+        <div class="section-head"><div><p class="eyebrow">ROOMS &amp; RATES</p><h2>Your stay with ZeroDesk</h2>
+        <p id="roomResult" role="status">Choose dates to see which rooms are available.</p></div>
+        <label class="sort-field">Sort by <select id="roomSort"><option value="default">Room number</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label></div>
+        <div class="filter-row"><button class="filter-chip active" data-filter="all">All rooms</button><button class="filter-chip" data-filter="deluxe">Deluxe</button><button class="filter-chip" data-filter="premium">Premium</button><button class="filter-chip" data-filter="suite">Suites</button><button id="clearDates" class="text-action" hidden>Clear dates</button></div>
         <div id="roomGrid" class="room-grid"></div>
-      </div>
-
-    </section>
+      </section>
+      <section id="hotelGuide" class="hotel-guide"><p class="eyebrow">THE HOTEL GUIDE</p><h2>India’s waterfront icons</h2><p>Explore these properties and check rates directly with the hotel.</p>
+      <div class="guide-grid"><article><img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/The_TAJ_Lake_Palace,_Udaipur.jpg/1280px-The_TAJ_Lake_Palace,_Udaipur.jpg" alt="Taj Lake Palace, Udaipur"><div><p class="eyebrow">UDAIPUR</p><h3>Taj Lake Palace</h3><p>A white palace on Lake Pichola, framed by the shore of Udaipur.</p><a href="https://www.tajhotels.com/en-in/hotels/taj-lake-palace-udaipur">Visit hotel website ↗</a></div></article><article><img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Taj_Mahal_Palace_Hotel_facade.jpg/960px-Taj_Mahal_Palace_Hotel_facade.jpg" alt="The Taj Mahal Palace, Mumbai"><div><p class="eyebrow">MUMBAI</p><h3>The Taj Mahal Palace</h3><p>A red dome rises above the harbour in Colaba, beside the Gateway of India.</p><a href="https://www.tajhotels.com/en-in/hotels/taj-mahal-palace-mumbai">Visit hotel website ↗</a></div></article></div></section>
+</section>
 
 
     <!-- AUTH -->
@@ -409,7 +345,7 @@
     </p>
 
     <p class="photo-credit">
-      Hotel imagery: Unsplash · Photos are illustrative, not actual room photographs.
+      Hotel guide photography (cropped for display): <a href="https://commons.wikimedia.org/wiki/File:The_TAJ_Lake_Palace,_Udaipur.jpg">Vishsd</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> and <a href="https://commons.wikimedia.org/wiki/File:Taj_Mahal_Palace_Hotel_facade.jpg">DesiBoy101</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Room gallery photographs are illustrative (Unsplash).
     </p>
   </footer>
 
