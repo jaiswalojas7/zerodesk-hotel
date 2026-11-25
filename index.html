@@ -77,7 +77,8 @@
       <span class="brand-word">Zero<span>Desk</span></span>
     </div>
 
-    <nav>
+    <button id="accountMenu" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button>
+    <nav id="siteNav">
       <button class="nav-btn active" data-view="home">Explore stays</button>
       <button class="nav-btn" data-view="booking">My bookings</button>
       <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
@@ -102,26 +103,32 @@
         </div>
       </section>
       <section class="city-search" id="citySearch" aria-label="Hotel search">
-        <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">Complete day</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button></div>
+        <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">By night</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button><button type="button" data-mode="nearby" aria-pressed="false">Nearby getaways</button></div>
         <form id="cityForm">
-          <label>Destination<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
+          <label>Location<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
+          <button type="button" id="nearMe" class="secondary">Near me</button>
           <label>Check-in<input type="date" id="arrivalDay" required></label>
           <label id="departureField">Check-out<input type="date" id="departureDay" required></label>
           <label id="timeField" hidden>Arrival (IST)<select id="arrivalHour"></select></label>
           <label id="durationField" hidden>Stay length<select id="hourCount"></select></label>
-          <button class="primary" type="submit">Find rooms →</button>
-        </form>
+          <details id="partyPicker"><summary id="partySummary">1 room · 2 adults · 0 children</summary><div class="party-fields"><label>Rooms<select id="guestRooms"></select></label><label>Adults<select id="guestAdults"></select></label><label>Children<select id="guestChildren"></select></label></div></details>
+          <button class="primary" type="submit">Search</button>
+        </form><p role="status" id="geoStatus"></p>
       </section>
       <section id="hotelResults" class="hotel-results" aria-labelledby="hotelHeading">
         <div class="results-head"><div><p class="eyebrow">HOTELS &amp; ROOMS</p><h2 id="hotelHeading">Find a stay in India</h2><p id="hotelCount" role="status"></p></div>
-        <label class="couple-filter"><input type="checkbox" id="coupleFilter"> Couple-friendly only</label></div>
+        <div class="result-filters"><label>Hotel chain<select id="chainChoice"><option value="">All chains</option></select></label><label>Price order<select id="priceOrder"><option value="">Recommended</option><option value="asc">Low to high</option><option value="desc">High to low</option></select></label><label class="couple-filter"><input type="checkbox" id="coupleFilter"> Couple-friendly only</label></div></div>
         <div id="propertyList" class="property-list"><p>Loading hotels…</p></div>
       </section>
       <dialog id="roomDialog" aria-labelledby="detailProperty">
         <div class="detail-heading"><p class="eyebrow" id="detailCity"></p><button class="secondary" id="closeDetail" type="button" aria-label="Close room details">×</button></div>
-        <h2 id="detailProperty"></h2><h3 id="detailRoom"></h3><p id="detailSummary"></p>
-        <dl id="roomFacts"></dl><p id="detailStay"></p>
-        <p id="providerNote"></p><button type="button" id="catalogPay" class="primary">Pay with Razorpay</button>
+        <img id="detailPhoto" alt="" hidden><div id="roomPhotos"></div><h2 id="detailProperty"></h2><h3 id="detailRoom"></h3><p id="detailSummary"></p>
+        <a id="shareStay" target="_blank" rel="noopener">Share on WhatsApp ↗</a>
+        <section><h3>Amenities &amp; services</h3><ul id="hotelServices" class="amenity-list"></ul></section>
+        <section><h3>Guest ratings &amp; reviews</h3><p id="guestRating"></p><div id="guestComments"></div><a id="listingReviews" target="_blank" rel="noopener">Read listing reviews ↗</a></section>
+        <section><h3>Nearby places</h3><ul id="nearbyList"></ul><div id="mapLinks"></div></section>
+        <h3>Room details &amp; property rules</h3><dl id="roomFacts"></dl><p id="detailStay"></p>
+        <p id="providerNote"></p><button type="button" id="catalogPay" class="primary">Proceed to payment</button>
         <div id="requestActions" hidden><button id="requestStay" type="button" class="secondary">Request these exact dates or hours with ZeroDesk</button><p id="requestMessage" role="status"></p></div>
         <p><a id="roomSource" target="_blank" rel="noopener">Room information</a> · <a id="ruleSource" target="_blank" rel="noopener">Property rules</a></p>
       </dialog>
@@ -301,7 +308,7 @@
         <h3>Staff QR Check-in</h3>
 
         <p>
-          Scan a guest's short-lived QR pass or paste its code.
+          Scan a guest’s arrival or departure QR, or paste the pass code.
           Staff authorization is checked by Supabase.
         </p>
 
@@ -341,7 +348,7 @@
           class="alert info"
           role="status"
           aria-live="polite">
-          Only staff with admin access can approve check-in.
+          Staff can verify arrival and departure passes here.
         </div>
 
       </div>
@@ -369,7 +376,7 @@
     <p>Thoughtful stays. Seamless arrivals.</p>
 
     <p>
-      ZeroDesk sample rates · Razorpay test checkout · No hotel-issued reservation.
+      ZeroDesk sample rates · Test checkout · No hotel-issued reservation.
     </p>
 
     <p class="photo-credit">

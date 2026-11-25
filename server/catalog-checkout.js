@@ -37,6 +37,8 @@ async function createCatalogOrder(input, res, {user, keyId, razorpay, base, head
   if (!keyId.startsWith('rzp_test_')) {
     return res.status(409).json({error:'Catalogue checkout requires Razorpay test mode.'});
   }
+  const adults = input.adults ?? 2;
+  if (!Number.isInteger(adults) || adults < 1 || adults > 2) return res.status(400).json({error:"Use a group request for this party."});
   const hotel = hotels.find(item => item.checkoutCode === input.catalogCode);
   const stay = hotel && quote(hotel,input);
   if (!stay) return res.status(400).json({error:'Choose valid stay dates or a future 1–6 hour slot.'});
@@ -56,7 +58,7 @@ async function createCatalogOrder(input, res, {user, keyId, razorpay, base, head
   const saved = await fetch(base + '/rest/v1/payment_orders',{method:'POST',
     headers:{...headers,'Content-Type':'application/json',Prefer:'return=minimal'},
     body:JSON.stringify({guest_id:user.id,room_id:room.id,check_in:stay.checkIn,check_out:stay.checkOut,
-      slot_start:stay.start,slot_end:stay.end,catalog_label:description,amount_paise:stay.amount,
+      slot_start:stay.start,slot_end:stay.end,catalog_label:description,catalog_adults:adults,amount_paise:stay.amount,
       currency:'INR',razorpay_order_id:order.id,status:'pending'})});
   if (!saved.ok) throw new Error('Could not prepare catalogue checkout');
   return res.status(200).json({orderId:order.id,keyId,amount:stay.amount,currency:'INR',description});

@@ -98,3 +98,61 @@
 .request-row form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .request-row input { max-width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; }
 #requestActions { margin:12px 0; }
+
+/* Keep controls in the document flow when navigation or guest options expand. */
+#accountMenu { display:none; }
+.topbar { height:auto; min-height:70px; padding-block:10px; gap:12px; }
+.topbar nav { justify-content:flex-end; }
+#cityForm { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr)); align-items:end; }
+#cityForm>*,.property-body,.detail-heading>* { min-width:0; }
+#cityForm #partyPicker { grid-column:span 2; }
+#partyPicker summary,#accountMenu,.result-filters select { padding:10px 12px; border:1px solid #d7d0d1; border-radius:8px; background:white; color:var(--ink); font:inherit; }
+#partyPicker summary { cursor:pointer; min-height:44px; }
+.party-fields,.result-filters,#mapLinks { display:flex; flex-wrap:wrap; gap:10px; align-items:end; }
+.party-fields { margin-top:8px; }
+#cityForm .party-fields label { flex:1 1 60px; }
+#geoStatus:empty { display:none; }
+.result-filters>label { font-size:13px; }
+.result-filters select { display:block; max-width:100%; }
+.results-head { flex-wrap:wrap; margin-bottom:18px; }
+.search-tabs { flex-wrap:wrap; }
+#roomDialog { width:min(640px,calc(100% - 20px)); max-height:88vh; max-height:88dvh; overscroll-behavior:contain; overflow-wrap:anywhere; }
+#roomDialog img { width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin-bottom:12px; }
+#roomDialog section { margin:20px 0; }
+#roomDialog .detail-heading { position:sticky; top:-24px; background:white; z-index:1; padding:6px 0; }
+#roomDialog .detail-heading p { margin:0; }
+#closeDetail { font-size:22px; min-width:44px; min-height:44px; }
+.amenity-list { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
+.amenity-list li { background:#f6f2ef; border-radius:8px; padding:5px 10px; font-size:14px; }
+#mapLinks a,#shareStay,#listingReviews { color:var(--deep); text-underline-offset:3px; }
+#scanVideo,.qr img,.qr canvas,.booking-summary img { max-width:100%; }
+.booking-row,.room-status,.summary-card,.form-card { min-width:0; overflow-wrap:anywhere; }
+.stay-review { display:grid; gap:6px; margin:12px 0; }
+.stay-review textarea { max-width:100%; padding:8px; }
+@media(max-width:720px) {
+ .topbar { display:grid; grid-template-columns:1fr auto; align-items:center; padding:8px 14px; min-height:56px; }
+ #accountMenu { display:block; min-height:44px; }
+ .topbar nav { display:none; grid-column:1/-1; justify-content:flex-start; }
+ .topbar:has(#accountMenu[aria-expanded="true"]) nav { display:flex; }
+ .topbar nav button { min-height:44px; }
+ #cityForm { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ #cityForm>label:first-child { grid-column:auto; }
+ #cityForm #nearMe { grid-column:auto; min-height:44px; }
+ .search-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+ .search-tabs button { min-height:44px; padding:5px; line-height:1.2; border-radius:8px; font-size:13px; }
+ #cityForm input,#cityForm select,.field input { font-size:16px; }
+ .property-body button,#catalogPay { width:100%; min-height:44px; }
+ .results-head { align-items:stretch; } .result-filters { align-items:center; }
+ .scene-bar>div:first-child { min-width:0; overflow-wrap:anywhere; } .scene-controls { flex-shrink:0; }
+ .hero-dots,.scene-controls { max-width:100%; }
+}
+@media(max-width:390px) {
+ .container { padding-inline:10px; } .city-search { padding-inline:10px; }
+ #roomDialog { padding:14px; } #roomDialog .detail-heading { top:-14px; }
+ .destination-copy { padding-left:16px; } .destination-copy h1 { font-size:42px; }
+ .property-body { padding:16px; } .form-actions { flex-wrap:wrap; }
+ .stat { padding:10px; } .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+#roomPhotos { display:flex; gap:6px; }
+#roomPhotos button { background:none; border:1px solid var(--line); padding:2px; border-radius:6px; }
+#roomPhotos img { width:62px; height:42px; margin:0; display:block; }

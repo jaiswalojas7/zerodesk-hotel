@@ -13,7 +13,37 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/eb65e940-5f99-4e6c-88f1-56dcb82a9e26.jpg",
     "checkoutCode": "ZDT-TAJ-LAKE-PALACE",
-    "testRate": 24000
+    "testRate": 24000,
+    "facts": {
+      "amenities": [
+        "Swimming Pool",
+        "Spa",
+        "Restaurant",
+        "Indoor Games",
+        "Butler Services",
+        "Room Service"
+      ],
+      "rating": 4.7,
+      "count": 804,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Lake Pichola · 0 Km",
+        "City Palace · 0.5 Km",
+        "Doodh Talai Lake · 2.2 Km",
+        "Sajjangarh Biological Park · 3.8 Km"
+      ]
+    },
+    "chain": "Taj",
+    "gallery": [
+      "https://gos3.ibcdn.com/eb65e940-5f99-4e6c-88f1-56dcb82a9e26.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/poi-1f0f76e7a156bd1f69db00abd9c2c5c4-Doodh_talai_lake_1.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/flyfish/raw/NH73220335441860/QS1042/QS1042-Q1/1725345370424.jpeg"
+    ]
   },
   {
     "city": "Delhi",
@@ -29,7 +59,32 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/28ea220af52311e794f3025f77df004f.jpg",
     "checkoutCode": "ZDT-ITC-MAURYA",
-    "testRate": 11500
+    "testRate": 11500,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.3,
+      "count": 3216,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: not accepted",
+        "Accepted ID: Passport, Driving License",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Delhi Safdarjung Railway Station · 4.1 Km",
+        "Bhikaji Cama Place Metro Station · 4.6 Km",
+        "Gurudwara Bangla Sahib · 7.3 Km",
+        "India Gate · 8.1 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/28ea220af52311e794f3025f77df004f.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/poi-62cdec96693df29a1b0bd5d62367b286-m_activities_delhi_india_gate_1_l_442_663.jpg"
+    ]
   },
   {
     "city": "Jodhpur",
@@ -45,7 +100,27 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/3a9e41cc-ac83-460e-a737-bed840cb0d38.jpg",
     "checkoutCode": "ZDT-UMAID-BHAWAN-PALACE",
-    "testRate": 26000
+    "testRate": 26000,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.8,
+      "count": 261,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License, Govt. ID"
+      ],
+      "near": []
+    },
+    "chain": "Taj",
+    "gallery": [
+      "https://gos3.ibcdn.com/3a9e41cc-ac83-460e-a737-bed840cb0d38.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/flyfish/raw/NH78007348752200/QS1042/QS1042-Q1/1723952516882.jpeg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/flyfish/raw/NH2203782956330/QS1042/QS1042-Q1/IMG-20210930-WA0023.jpg"
+    ]
   },
   {
     "city": "Mumbai",
@@ -61,7 +136,36 @@
     "localId": true,
     "photo": "https://hblimg.mmtcdn.com/content/hubble/img/activity-img/mmt/activities/m_taj_mahal_mumbai_signature_suite_living_room_l_1120_1400.jpg",
     "checkoutCode": "ZDT-THE-TAJ-MAHAL-PALACE",
-    "testRate": 32500
+    "testRate": 32500,
+    "facts": {
+      "amenities": [
+        "Glass Edge Swimming Pool",
+        "Spa",
+        "Restaurant",
+        "Butler Services",
+        "Room Service",
+        "Bar"
+      ],
+      "rating": 4.6,
+      "count": 1700,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: not accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Wellington Fountain · 0.6 Km",
+        "Colaba Market · 0.8 Km",
+        "Gateway Of India Mumbai · 1.1 Km",
+        "Hanging Gardens · 8.5 Km"
+      ]
+    },
+    "chain": "Taj",
+    "gallery": [
+      "https://hblimg.mmtcdn.com/content/hubble/img/activity-img/mmt/activities/m_taj_mahal_mumbai_signature_suite_living_room_l_1120_1400.jpg",
+      "https://gos3.ibcdn.com/ce4d12dcc80011e99a7a0242ac110003.jpg"
+    ]
   },
   {
     "city": "Pune",
@@ -77,7 +181,32 @@
     "localId": true,
     "photo": "https://cache.marriott.com/content/dam/marriott-renditions/PNQMD/pnqmd-facing-7109-hor-wide.jpg?output-quality=70&interpolation=progressive-bilinear&downsize=1336px:*",
     "checkoutCode": "ZDT-SHERATON-GRAND-PUNE-BUND-GARDEN-HOTEL",
-    "testRate": 7900
+    "testRate": 7900,
+    "facts": {
+      "amenities": [
+        "Swimming Pool",
+        "Restaurant",
+        "Indoor Games"
+      ],
+      "rating": 4.5,
+      "count": 1186,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Pune Junction · 1.5 Km",
+        "Pune Railway Station · 1.6 Km",
+        "Shaniwar Wada · 2.9 Km",
+        "Khadakwasla Dam, Pune · 18 Km"
+      ]
+    },
+    "chain": "Sheraton",
+    "gallery": [
+      "https://cache.marriott.com/content/dam/marriott-renditions/PNQMD/pnqmd-facing-7109-hor-wide.jpg?output-quality=70&interpolation=progressive-bilinear&downsize=1336px:*",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/room-imgs/201208171221453837-543504-c32ebbee6c3211ebba8a0242ac110003.jpg"
+    ]
   },
   {
     "city": "Mumbai",
@@ -93,7 +222,27 @@
     "localId": false,
     "photo": "https://gos3.ibcdn.com/752adab2727e11ea81e60242ac110002.jpg",
     "checkoutCode": "ZDT-ITC-GRAND-CENTRAL",
-    "testRate": 10900
+    "testRate": 10900,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.6,
+      "count": 3371,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Driving License",
+        "Pets: not permitted"
+      ],
+      "near": []
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/752adab2727e11ea81e60242ac110002.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/images360Partial/201310261601384953/thumbnail_f0de81f2-b6b4-4761-bebd-43e9d081bcbd.jpg"
+    ]
   },
   {
     "city": "Delhi",
@@ -109,7 +258,26 @@
     "couples": true,
     "localId": true,
     "checkoutCode": "ZDT-HOTEL-AMBIENCE",
-    "testRate": 350
+    "testRate": 350,
+    "facts": {
+      "amenities": [
+        "Car Parking",
+        "Air Conditioner",
+        "Water",
+        "Hot Water Geyser"
+      ],
+      "rating": 4.4,
+      "count": 14,
+      "rules": [
+        "Accepted ID: original passport, Aadhaar, driving licence or voter ID",
+        "Couple stays: both guests must be over 18"
+      ],
+      "near": []
+    },
+    "chain": "Other",
+    "gallery": [
+      "https://htlimages.brevistay.com/8366/20260430/1.jpg"
+    ]
   },
   {
     "city": "Mumbai",
@@ -125,7 +293,26 @@
     "couples": true,
     "localId": true,
     "checkoutCode": "ZDT-HOTEL-SAHAR-GARDEN",
-    "testRate": 475
+    "testRate": 475,
+    "facts": {
+      "amenities": [
+        "Car Parking",
+        "Air Conditioner",
+        "Water",
+        "Hot Water Geyser"
+      ],
+      "rating": 4.1,
+      "count": 1411,
+      "rules": [
+        "Accepted ID: original passport, Aadhaar, driving licence or voter ID",
+        "Couple stays: both guests must be over 18"
+      ],
+      "near": []
+    },
+    "chain": "Other",
+    "gallery": [
+      "https://htlimages.brevistay.com/743/20250707/1.jpg"
+    ]
   },
   {
     "city": "Pune",
@@ -141,7 +328,26 @@
     "couples": true,
     "localId": true,
     "checkoutCode": "ZDT-HOTEL-STUDIO-ESTIQUE",
-    "testRate": 525
+    "testRate": 525,
+    "facts": {
+      "amenities": [
+        "Car Parking",
+        "Air Conditioner",
+        "Work Desk",
+        "Water"
+      ],
+      "rating": 3.6,
+      "count": 7,
+      "rules": [
+        "Accepted ID: original passport, Aadhaar, driving licence or voter ID",
+        "Couple stays: both guests must be over 18"
+      ],
+      "near": []
+    },
+    "chain": "Other",
+    "gallery": [
+      "https://htlimages.brevistay.com/11696/20260407/1.jpg"
+    ]
   },
   {
     "city": "Jodhpur",
@@ -157,7 +363,25 @@
     "couples": false,
     "localId": null,
     "checkoutCode": "ZDT-STAMPS-BY-EIGHT-CONTINENTS",
-    "testRate": 450
+    "testRate": 450,
+    "facts": {
+      "amenities": [
+        "Car Parking",
+        "Air Conditioner",
+        "Water",
+        "Hot Water Geyser"
+      ],
+      "rating": null,
+      "count": null,
+      "rules": [
+        "Accepted ID: original passport, Aadhaar, driving licence or voter ID"
+      ],
+      "near": []
+    },
+    "chain": "Other",
+    "gallery": [
+      "https://htlimages.brevistay.com/12271/20260417/1.jpg"
+    ]
   },
   {
     "city": "Udaipur",
@@ -173,7 +397,26 @@
     "couples": true,
     "localId": true,
     "checkoutCode": "ZDT-HOTEL-ACE-PLAZA",
-    "testRate": 300
+    "testRate": 300,
+    "facts": {
+      "amenities": [
+        "Air Conditioner",
+        "Water",
+        "Hot Water Geyser",
+        "Banquet Hall"
+      ],
+      "rating": 3.8,
+      "count": 5,
+      "rules": [
+        "Accepted ID: original passport, Aadhaar, driving licence or voter ID",
+        "Couple stays: both guests must be over 18"
+      ],
+      "near": []
+    },
+    "chain": "Other",
+    "gallery": [
+      "https://htlimages.brevistay.com/6151/20240516/1.jpg"
+    ]
   },
   {
     "city": "Mumbai",
@@ -189,7 +432,31 @@
     "localId": false,
     "photo": "https://gos3.ibcdn.com/87402574c37f11eb84af0242ac110002.jpg",
     "checkoutCode": "ZDT-ITC-MARATHA",
-    "testRate": 12500
+    "testRate": 12500,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.5,
+      "count": 6060,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "T2 - Chhatrapati Shivaji Airport · 1.1 Km",
+        "MIDC - Andheri Metro · 2.8 Km",
+        "SEEPZ Metro · 3.7 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/87402574c37f11eb84af0242ac110002.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/images360Partial/20131124133838404/thumbnail_3c3e3f70-9596-4c2b-93c0-1ba7a1d9dc64.jpg"
+    ]
   },
   {
     "city": "Jaipur",
@@ -205,7 +472,32 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/91a3dc30116e11ecae250a58a9feac02.jpg",
     "checkoutCode": "ZDT-ITC-RAJPUTANA",
-    "testRate": 9500
+    "testRate": 9500,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Indoor Games",
+        "Steam and Sauna"
+      ],
+      "rating": 4.5,
+      "count": 3937,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Driving License, Govt. ID"
+      ],
+      "near": [
+        "Jaipur Railway Station · 0.8 Km",
+        "Khimsar Fort · 2.4 Km",
+        "City Palace, Jaipur · 3.7 Km",
+        "Hawa Mahal · 4 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/91a3dc30116e11ecae250a58a9feac02.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/poi-7d70c48472bd96e0e32f36d47d4e8552-khimsar_fort_1.jpg"
+    ]
   },
   {
     "city": "Chennai",
@@ -221,7 +513,30 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/12c21874a99311e79b9c0a9df65c8753.jpg",
     "checkoutCode": "ZDT-ITC-GRAND-CHOLA",
-    "testRate": 11900
+    "testRate": 11900,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.5,
+      "count": 4102,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: not accepted",
+        "Accepted ID: Passport, Driving License, Govt. ID"
+      ],
+      "near": [
+        "Arulmigu Karaneeswarar Temple · 3.2 Km",
+        "Mambalam Railway Station · 5.8 Km",
+        "Marina Beach · 11.9 Km",
+        "Panaiyur Beach ECR · 19.6 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/12c21874a99311e79b9c0a9df65c8753.jpg"
+    ]
   },
   {
     "city": "Kolkata",
@@ -237,7 +552,26 @@
     "localId": true,
     "photo": "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201904151217428716-2b66389243f611ea8dfe0242ac110002.jpg",
     "checkoutCode": "ZDT-ITC-ROYAL-BENGAL",
-    "testRate": 11400
+    "testRate": 11400,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.5,
+      "count": 6715,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": []
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201904151217428716-2b66389243f611ea8dfe0242ac110002.jpg"
+    ]
   },
   {
     "city": "Hyderabad",
@@ -253,7 +587,35 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/6e513098600a11e89a9702ab50735238.jpg",
     "checkoutCode": "ZDT-ITC-KOHENUR",
-    "testRate": 10300
+    "testRate": 10300,
+    "facts": {
+      "amenities": [
+        "Infinity Swimming Pool",
+        "Spa",
+        "Restaurant",
+        "Room Service",
+        "Bar",
+        "Steam and Sauna"
+      ],
+      "rating": 4.5,
+      "count": 3328,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: not accepted",
+        "Accepted ID: Passport, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Durgam Cheruvu Lake · 2 Km",
+        "Golconda Fort · 8.9 Km",
+        "KPHB METRO Station · 9.3 Km",
+        "Hussain Sagar Lake · 12.4 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/6e513098600a11e89a9702ab50735238.jpg"
+    ]
   },
   {
     "city": "Bengaluru",
@@ -269,6 +631,159 @@
     "localId": true,
     "photo": "https://gos3.ibcdn.com/5a9141f8a90111e7b13f02c16acac17e.jpg",
     "checkoutCode": "ZDT-ITC-WINDSOR",
-    "testRate": 9800
+    "testRate": 9800,
+    "facts": {
+      "amenities": [
+        "Restaurant",
+        "Steam and Sauna"
+      ],
+      "rating": 4.4,
+      "count": 1960,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Bangalore Palace · 1.9 Km",
+        "Cubbon Park · 3.3 Km",
+        "Commercial Street · 4 Km",
+        "UB City Mall · 4.1 Km"
+      ]
+    },
+    "chain": "ITC",
+    "gallery": [
+      "https://gos3.ibcdn.com/5a9141f8a90111e7b13f02c16acac17e.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/images360Partial/201311021144511865/thumbnail_ea35e6f6-8aa3-46c7-952d-45e7972bafb1.jpg"
+    ]
+  },
+  {
+    "city": "Mumbai",
+    "name": "Ginger Mumbai Airport",
+    "room": "Luxe Twin Room",
+    "description": "Twin accommodation near Terminal 1 in Vile Parle.",
+    "shower": "Confirm with property",
+    "toiletries": "Confirm with property",
+    "source": "https://www.makemytrip.com/hotels/ginger_mumbai_airport-details-mumbai.html",
+    "booking": "https://www.makemytrip.com/hotels/ginger_mumbai_airport-details-mumbai.html",
+    "mode": "day",
+    "couples": true,
+    "localId": true,
+    "checkoutCode": "ZDT-GINGER-MUMBAI-AIRPORT",
+    "testRate": 4900,
+    "facts": {
+      "amenities": [
+        "Door-Eye",
+        "Door Chain",
+        "Restaurant"
+      ],
+      "rating": 4,
+      "count": 5232,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "T1 - Chhatrapati Shivaji International Airport · 0.8 Km",
+        "Juhu Beach · 3.9 Km",
+        "Juhu Joggers Park · 4.3 Km"
+      ]
+    },
+    "chain": "Ginger",
+    "photo": "https://gos3.ibcdn.com/fb37207e87de11eebfae0a58a9feac02.jpeg",
+    "gallery": [
+      "https://gos3.ibcdn.com/fb37207e87de11eebfae0a58a9feac02.jpeg"
+    ]
+  },
+  {
+    "city": "Delhi",
+    "name": "bloomrooms @ Janpath",
+    "room": "Standard Twin",
+    "description": "Twin accommodation near Connaught Place in central Delhi.",
+    "shower": "Confirm with property",
+    "toiletries": "Dental kit listed",
+    "source": "https://www.makemytrip.com/hotels/bloomrooms_janpath-details-delhi.html",
+    "booking": "https://www.makemytrip.com/hotels/bloomrooms_janpath-details-delhi.html",
+    "mode": "day",
+    "couples": true,
+    "localId": true,
+    "checkoutCode": "ZDT-BLOOMROOMS-JANPATH",
+    "testRate": 5200,
+    "facts": {
+      "amenities": [
+        "Airport Transfers",
+        "Living Area",
+        "Hairdryer",
+        "Dental Kit",
+        "Geyser/Water Heater",
+        "Work Desk"
+      ],
+      "rating": 4.1,
+      "count": 691,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Rajiv Chowk Metro Station · 1.8 Km",
+        "Connaught Place Inner Circle · 1.9 Km",
+        "Gurudwara Bangla Sahib · 1.9 Km",
+        "Shivaji Stadium Metro Station · 2 Km"
+      ]
+    },
+    "chain": "Bloom",
+    "photo": "https://gos3.ibcdn.com/1bc38ea8409411eb8f5d0242ac110002.png",
+    "gallery": [
+      "https://gos3.ibcdn.com/1bc38ea8409411eb8f5d0242ac110002.png",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/poi-8b2a11b03db158625fd45dd14b41e892-poi-79e4ef4e09f418ed17d772fdfc92f10f-poi-d25e4016f6b50e7e817aaf3360fc2f99-Connaught_Place_Delhi_1.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/flyfish/raw/NH25166361667978/QS1042/QS1042-Q1/1000284331.jpg"
+    ]
+  },
+  {
+    "city": "Delhi",
+    "name": "Eros Hotel New Delhi Nehru Place",
+    "room": "2 Twin Classic",
+    "description": "A twin room at the Nehru Place property in south Delhi.",
+    "shower": "Confirm with property",
+    "toiletries": "Confirm with property",
+    "source": "https://www.makemytrip.com/hotels/eros_hotel_new_delhi_nehru_place-details-delhi.html",
+    "booking": "https://www.makemytrip.com/hotels/eros_hotel_new_delhi_nehru_place-details-delhi.html",
+    "mode": "day",
+    "couples": true,
+    "localId": true,
+    "checkoutCode": "ZDT-EROS-HOTEL-NEW-DELHI-NEHRU-PLACE",
+    "testRate": 8500,
+    "facts": {
+      "amenities": [
+        "2 x Swimming Pool",
+        "Restaurant"
+      ],
+      "rating": 4.2,
+      "count": 4396,
+      "rules": [
+        "Lead guest: 18+",
+        "All-male groups: not accepted",
+        "Accepted ID: Passport, Aadhaar, Driving License, Govt. ID",
+        "Pets: not permitted"
+      ],
+      "near": [
+        "Kalkaji Mandir Metro Station · 1.7 Km",
+        "Lajpat Nagar Metro Station · 4.5 Km",
+        "India Gate · 9.3 Km",
+        "Connaught Place Inner Circle · 12.1 Km"
+      ]
+    },
+    "chain": "Eros",
+    "photo": "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/2016072005194324962-48e3081e-821e-4654-89b4-f41dcdd2e702.jpg",
+    "gallery": [
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/2016072005194324962-48e3081e-821e-4654-89b4-f41dcdd2e702.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/images360Partial/2016072005194324962/thumbnail_349441cc-caf5-4833-bfed-d12049a4d3c2.jpg",
+      "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/poi-62cdec96693df29a1b0bd5d62367b286-m_activities_delhi_india_gate_1_l_442_663.jpg"
+    ]
   }
 ]
