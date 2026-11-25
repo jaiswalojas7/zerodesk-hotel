@@ -252,12 +252,6 @@
     "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
-    "name": "ITC Windsor A Luxury Collection Hotel",
-    "city": "Bengaluru",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
-  },
-  {
     "name": "Welcomhotel by ITC Hotels, Richmond Road, Bengaluru",
     "city": "Bengaluru",
     "chain": "ITC",
@@ -388,12 +382,6 @@
     "city": "Chennai",
     "chain": "Ginger",
     "source": "https://www.gingerhotels.com/hotels/ginger-chennai-vadapalani"
-  },
-  {
-    "name": "ITC Grand Chola A Luxury Collection Hotel",
-    "city": "Chennai",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
     "name": "Welcomhotel by ITC Hotels, Cathedral Road, Chennai",
@@ -538,12 +526,6 @@
     "city": "Delhi",
     "chain": "Ginger",
     "source": "https://www.gingerhotels.com/hotels/ginger-east-delhi"
-  },
-  {
-    "name": "ITC Maurya A Luxury Collection Hotel",
-    "city": "Delhi",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
     "name": "Welcomhotel by ITC Hotels, Delhi-Gurugram Highway, Delhi",
@@ -846,12 +828,6 @@
     "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
-    "name": "ITC Kohenur A Luxury Collection Hotel",
-    "city": "Hyderabad",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
-  },
-  {
     "name": "Sheraton Hyderabad Hotel",
     "city": "Hyderabad",
     "chain": "Sheraton",
@@ -904,12 +880,6 @@
     "city": "Jaipur",
     "chain": "Ginger",
     "source": "https://www.gingerhotels.com/hotels/ginger-jaipur-ajmer-road"
-  },
-  {
-    "name": "ITC Rajputana A Luxury Collection Hotel",
-    "city": "Jaipur",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
     "name": "Mementos by ITC Hotels, Jaipur",
@@ -1074,12 +1044,6 @@
     "source": "https://www.tajhotels.com/en-in/hotels/taj-malabar-cochin"
   },
   {
-    "name": "ITC Royal Bengal A Luxury Collection Hotel",
-    "city": "Kolkata",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
-  },
-  {
     "name": "ITC Sonar A Luxury Collection Hotel",
     "city": "Kolkata",
     "chain": "ITC",
@@ -1210,18 +1174,6 @@
     "city": "Mumbai",
     "chain": "Ginger",
     "source": "https://www.gingerhotels.com/hotels/ginger-mumbai-goregaon"
-  },
-  {
-    "name": "ITC Grand Central A Luxury Collection Hotel",
-    "city": "Mumbai",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
-  },
-  {
-    "name": "ITC Maratha A Luxury Collection Hotel",
-    "city": "Mumbai",
-    "chain": "ITC",
-    "source": "https://www.itchotels.com/in/en/clubitc/participating-hotels"
   },
   {
     "name": "Taj Lands End, Mumbai",
