@@ -369,8 +369,28 @@ async function loadAdmin(){
  if(error){$('adminBookings').textContent=error.message;return;}
  const bs=data||[];
  $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Demo booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
- $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span>${safe(b.id.slice(0,8))}</span><span>Room ${safe(rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)}</span><span>${safe(b.check_in)} → ${safe(b.check_out)}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
+ $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span style="min-width:0;overflow-wrap:anywhere"><strong data-guest-id="${safe(b.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(b.id.slice(0,8))}</small></span><span>Room ${safe(rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)}</span><span>${safe(b.check_in)} → ${safe(b.check_out)}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
+ const nameLabels = Array.from($('adminBookings').querySelectorAll('[data-guest-id]'));
+ const guestIds = [...new Set(nameLabels.map(label => label.dataset.guestId).filter(Boolean))];
+ const names = new Map();
+ for (let offset = 0; offset < guestIds.length; offset += 50) {
+  const ids = guestIds.slice(offset, offset + 50);
+  try {
+   const {data: profiles, error} = await db.from('profiles').select('id,full_name').in('id', ids);
+   if (error) continue;
+   for (const profile of profiles || []) {
+    const name = profile.full_name?.trim();
+    if (name) names.set(profile.id, name);
+   }
+  } catch {
+   // Keep the booking visible when the optional profile lookup is unavailable.
+  }
+ }
+ for (const label of nameLabels) {
+  const name = names.get(label.dataset.guestId);
+  if (name) label.textContent = name;
+ }
 }
 async function approvePass(){
  if(!isAdmin)return toast('Staff access required');
