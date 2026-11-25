@@ -119,13 +119,20 @@
         <div class="results-head"><div><p class="eyebrow">HOTELS &amp; ROOMS</p><h2 id="hotelHeading">Find a stay in India</h2><p id="hotelCount" role="status"></p></div>
         <div class="result-filters"><label>Hotel chain<select id="chainChoice"><option value="">All chains</option></select></label><label>Price order<select id="priceOrder"><option value="">Recommended</option><option value="asc">Low to high</option><option value="desc">High to low</option></select></label><label class="couple-filter"><input type="checkbox" id="coupleFilter"> Couple-friendly only</label></div></div>
         <div id="propertyList" class="property-list"><p>Loading hotels…</p></div>
+        <section id="directorySection" hidden aria-labelledby="directoryTitle">
+          <h3 id="directoryTitle">More hotels in the chain directory</h3>
+          <p>These properties have no confirmed ZeroDesk rates or room inventory yet.</p>
+          <label>Find a hotel or destination <input type="search" id="directorySearch" placeholder="Try Whitefield or Bengaluru"></label>
+          <p id="directoryCount" role="status"></p>
+          <ul id="directoryList"></ul><button id="directoryMore" type="button" class="secondary">Show more hotels</button>
+        </section>
       </section>
       <dialog id="roomDialog" aria-labelledby="detailProperty">
         <div class="detail-heading"><p class="eyebrow" id="detailCity"></p><button class="secondary" id="closeDetail" type="button" aria-label="Close room details">×</button></div>
         <img id="detailPhoto" alt="" hidden><div id="roomPhotos"></div><h2 id="detailProperty"></h2><h3 id="detailRoom"></h3><p id="detailSummary"></p>
         <a id="shareStay" target="_blank" rel="noopener">Share on WhatsApp ↗</a>
         <section><h3>Amenities &amp; services</h3><ul id="hotelServices" class="amenity-list"></ul></section>
-        <section><h3>Guest ratings &amp; reviews</h3><p id="guestRating"></p><div id="guestComments"></div><a id="listingReviews" target="_blank" rel="noopener">Read listing reviews ↗</a></section>
+        <section><h3>Guest ratings &amp; reviews</h3><p id="guestRating"></p><div id="guestComments"></div></section>
         <section><h3>Nearby places</h3><ul id="nearbyList"></ul><div id="mapLinks"></div></section>
         <h3>Room details &amp; property rules</h3><dl id="roomFacts"></dl><p id="detailStay"></p>
         <p id="providerNote"></p><button type="button" id="catalogPay" class="primary">Proceed to payment</button>

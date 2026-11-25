@@ -29,7 +29,11 @@ for (const [id,min,max,initial] of [['guestRooms',1,4,1],['guestAdults',1,8,2],[
   const field=byId(id);
   for(let n=min;n<=max;n++) field.add(new Option(String(n),String(n)));
   field.value=initial;
-  field.onchange=()=>{byId('partySummary').textContent=partyText();};
+  field.onchange = () => {
+    const guests = party();
+    if (id !== 'guestRooms') byId('guestRooms').value = Math.max(guests.room_count, Math.ceil(guests.adults / 2), guests.children);
+    byId('partySummary').textContent = partyText();
+  };
 }
 byId('nearMe').onclick = () => {
   const message=byId('geoStatus');
@@ -63,7 +67,7 @@ byId('hourCount').value = '3';
 
 function updateMode(value) {
   mode = value;
-  if(mode==='nearby' && !city.value) city.value='Delhi';
+  if(mode==='nearby' && !centers[city.value]) city.value='Delhi';
   const hourly = mode === 'hourly';
   departure.disabled = hourly;
   byId('departureField').hidden = hourly;
@@ -86,6 +90,7 @@ function validSearch() {
   return byId('cityForm').reportValidity();
 }
 function renderHotels() {
+  renderDirectory();
   if (!hotels.length) return;
   const results = hotels.filter(hotel => hotel.mode === (mode === 'hourly' ? 'hourly' : 'day') && (mode === 'nearby' ? hotel.city !== city.value : (!city.value || city.value === hotel.city))
     && (!byId('chainChoice').value || hotel.chain === byId('chainChoice').value)
@@ -111,7 +116,7 @@ function renderHotels() {
       img.alt = hotel.photo ? hotel.name : scene.topic;
       figure.append(img);
       if (!hotel.photo && scene) {
-        const credit = node('figcaption');
+        const credit = node('span');
         credit.textContent = scene.topic;
         figure.append(credit);
       }
@@ -122,14 +127,20 @@ function renderHotels() {
     const room = node('p', hotel.room, 'category-name');
     const description = node('p', hotel.description);
     const policy = node('p', hotel.couples ? 'Couple-friendly' : 'Unmarried couples not accepted', 'policy-note');
-    const book = node('button', 'Book this room →', 'primary');
+    const book = node('button', hotel.salesClosed ? 'View room details →' : 'Book this room →', 'primary');
     book.type = 'button';
     book.onclick = () => {
       if (!validSearch()) return;
       showDetails(hotel);
     };
-    const rate = node('strong', rupees(hotel.testRate) + (mode === 'hourly' ? ' / hour' : ' / night') + ' · Test rate');
+    const rate = node('strong', hotel.salesClosed ? 'Test inventory pending' : rupees(hotel.testRate) + (mode === 'hourly' ? ' / hour' : ' / night') + ' · Test rate');
     body.append(location, title, room, description, rate, policy, book);
+    const photoButton = node('button', null, 'property-photo-button');
+    photoButton.type = 'button';
+    photoButton.setAttribute('aria-label', 'View ' + hotel.name + ' details');
+    photoButton.onclick = () => { if (validSearch()) showDetails(hotel); };
+    photoButton.append(...Array.from(figure.childNodes));
+    figure.append(photoButton);
     card.append(figure, body);
     target.append(card);
   }
@@ -154,8 +165,13 @@ function showDetails(hotel) {
   byId('hotelServices').replaceChildren(...hotel.facts.amenities.map(value=>node('li',value)));
   const {rating,count,near}=hotel.facts;
   byId('guestRating').textContent=rating ? rating.toFixed(1)+'/5 · '+count.toLocaleString('en-IN')+' listing ratings · 26 Nov 2026 snapshot' : 'See the listing for the latest guest ratings.';
-  byId('listingReviews').href=hotel.booking;
   const comments=byId('guestComments'); comments.replaceChildren();
+  for (const review of hotel.reviewNotes || []) {
+    const item = node('article', null, 'request-row');
+    item.append(node('strong', review.author + ' · ' + review.score), node('p', review.summary),
+      node('small', review.source + ' · ' + review.month + ' · Paraphrased guest review'));
+    comments.append(item);
+  }
   const reviewKey=hotel.checkoutCode; comments.dataset.hotel=reviewKey;
   if(typeof db!=='undefined') db.rpc('catalogue_reviews',{p_code:reviewKey}).then(({data})=>{
     if(comments.dataset.hotel!==reviewKey || !Array.isArray(data)) return;
@@ -181,23 +197,30 @@ function showDetails(hotel) {
   byId('detailStay').textContent = hourly ? formatTime(startTime()) + ' – ' + formatTime(startTime() + hours * 3600000) + ' IST · ' + hours + (hours === 1 ? ' hour requested' : ' hours requested')
     : arrival.value + ' → ' + departure.value + ' · ' + (Date.parse(departure.value) - Date.parse(arrival.value)) / 86400000 + ' night(s)';
   const units = hourly ? hours : (Date.parse(departure.value) - Date.parse(arrival.value)) / 86400000;
-  const total = units * hotel.testRate;
+  const guests = party();
+  const total = units * hotel.testRate * guests.room_count;
   const pay = byId('catalogPay');
   byId('detailStay').textContent += ' · '+partyText();
-  const group=party().room_count>1 || party().adults>2 || party().children>0;
-  pay.textContent = group ? 'Request group availability' : 'Proceed to payment';
-  byId('providerNote').textContent = rupees(hotel.testRate) + (hourly ? ' per hour' : ' per night') + ' × ' + units + ' = ' + rupees(total) + '. Sample price, test payment and ZeroDesk demo QR. This does not reserve a room with the hotel.';
-  if(group) byId('providerNote').textContent='Group and family stays require the hotel to confirm occupancy and a total before payment.';
+  const validParty = guests.adults >= guests.room_count && guests.adults <= 2 * guests.room_count && guests.children <= guests.room_count;
+  pay.textContent = 'Proceed to payment';
+  pay.disabled = !validParty;
+  byId('providerNote').textContent = validParty
+    ? rupees(hotel.testRate) + (hourly ? ' per hour' : ' per night') + ' × ' + units + ' × ' + guests.room_count + ' room(s) = ' + rupees(total) + '. Test payment. One ZeroDesk QR covers the party. No hotel reservation.'
+    : 'Test occupancy is 1–2 adults and up to one child per room. Close details to change your party.';
+  if (hotel.salesClosed) {
+    pay.disabled = true;
+    pay.textContent = 'Test inventory pending';
+    byId('providerNote').textContent = 'This property is awaiting test inventory. Choose another listed room to pay.';
+  }
   pay.onclick = () => {
     if (!validSearch()) return;
     if (!currentUser) {
       sessionStorage.setItem('zd-checkout-intent',JSON.stringify({code:hotel.checkoutCode,arrival:arrival.value,departure:departure.value,hour:byId('arrivalHour').value,duration:byId('hourCount').value,...party()}));
       dialog.close();show('auth');toast('Sign in to continue with this room');return;
     }
-    if(group){if(!requestUser){toast('Group requests are temporarily unavailable.');return;} byId('requestStay').click();return;}
     reserve(null, {catalogCode:hotel.checkoutCode, checkIn:arrival.value, checkOut:hourly ? null : departure.value,
       startHour:hourly ? Number(byId('arrivalHour').value) : null, hours:hourly ? hours : null,
-      adults:party().adults, expectedPaise:total * 100}, pay);
+      ...guests, expectedPaise:total * 100}, pay);
   };
   byId('roomSource').href = hotel.source;
   byId('ruleSource').href = hotel.booking;
@@ -267,7 +290,11 @@ readList('destinations.json').then(data => {
   slideshow(data);
   renderHotels();
 }).catch(() => document.querySelector('.scene-controls').hidden = true);
-readList('hotels.json').then(data => {
+Promise.all([readList('hotels.json'), readList('/api/catalog-rates').catch(() => null)]).then(([data, rates]) => {
+  if (rates) for (const h of data) {
+    h.salesClosed = !Number.isFinite(rates[h.checkoutCode]);
+    if (!h.salesClosed) h.testRate = rates[h.checkoutCode];
+  }
   hotels = data;
   for(const chain of [...new Set(data.map(h=>h.chain))].sort()) byId('chainChoice').add(new Option(chain,chain));
   for (const destination of new Set(hotels.map(hotel => hotel.city))) {
@@ -391,3 +418,32 @@ function resumeCheckout() {
   return true;
 }
 document.addEventListener('zerodesk:session',resumeCheckout);
+
+let directory = [];
+let directoryLimit = 24;
+function renderDirectory(extend = false) {
+  if (!extend) directoryLimit = 24;
+  const section = byId('directorySection');
+  section.hidden = !directory.length || mode !== 'day' || byId('coupleFilter').checked;
+  if (section.hidden) return;
+  const chain = byId('chainChoice').value;
+  const term = byId('directorySearch').value.toLowerCase().trim().replace(/bangalore/g, 'bengaluru');
+  const matches = directory.filter(h => (!city.value || h.city === city.value) &&
+    (!chain || chain === h.chain) && (h.name+' '+h.city).toLowerCase().includes(term));
+  byId('directoryCount').textContent = matches.length + ' directory properties';
+  byId('directoryList').replaceChildren(...matches.slice(0, directoryLimit).map(h => {
+    const entry = node('li');
+    entry.append(node('strong', h.name), node('small', h.chain + ' · ' + h.city));
+    return entry;
+  }));
+  byId('directoryMore').hidden = directoryLimit >= matches.length;
+}
+byId('directorySearch').oninput = () => renderDirectory();
+byId('directoryMore').onclick = () => { directoryLimit += 24; renderDirectory(true); };
+readList('hotel-directory.json').then(data => {
+  directory = data;
+  for (const destination of [...new Set(data.map(h => h.city))].sort()) {
+    if (![...city.options].some(option => option.value === destination)) city.add(new Option(destination, destination));
+  }
+  renderDirectory();
+}).catch(() => { byId('directorySection').hidden = true; });

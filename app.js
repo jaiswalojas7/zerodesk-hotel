@@ -387,7 +387,7 @@ async function loadBookings(){
  const pendingOrderId = sessionStorage.getItem(
   'zerodesk_pending_booking'
 );
- const {data,error}=await db.from('bookings').select('id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,catalog_adults,total_amount,status,created_at').eq('guest_id',currentUser.id).order('created_at',{ascending:false});
+ const {data,error}=await db.from('bookings').select('id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,total_amount,status,created_at').eq('guest_id',currentUser.id).order('created_at',{ascending:false});
  if(error){$('bookingContent').textContent=error.message;return;}
  myBookings=data||[];
  const byId=Object.fromEntries(rooms.map(r=>[r.id,r]));
@@ -448,7 +448,7 @@ function demoKey(id){
 }
 async function loadAdmin(){
  if(!isAdmin)return;
- const {data,error}=await db.from('bookings').select('id,guest_id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,catalog_adults,total_amount,status').order('check_in',{ascending:false});
+ const {data,error}=await db.from('bookings').select('id,guest_id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,total_amount,status').order('check_in',{ascending:false});
  if(error){$('adminBookings').textContent=error.message;return;}
  const bs=data||[];
  $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Demo booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');

@@ -1,9 +1,5 @@
 begin;
 set local lock_timeout = '5s';
-insert into public.rooms(room_number,room_type,price_per_night,is_active) values
-('ZDT-GINGER-MUMBAI-AIRPORT','Ginger Mumbai Airport · Luxe Twin Room',4900,false),
-('ZDT-BLOOMROOMS-JANPATH','bloomrooms @ Janpath · Standard Twin',5200,false),
-('ZDT-EROS-HOTEL-NEW-DELHI-NEHRU-PLACE','Eros Hotel New Delhi Nehru Place · 2 Twin Classic',8500,false);
 alter table public.stay_requests add column room_count smallint not null default 1 check(room_count between 1 and 4),
 add column adults smallint not null default 2 check(adults between 1 and 8), add column children smallint not null default 0 check(children between 0 and 4);
 grant insert(room_count,adults,children) on public.stay_requests to authenticated;
