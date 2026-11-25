@@ -18,6 +18,7 @@ function show(view, load=true){
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
  document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
  if(view!=='admin')stopScanner();
+ document.dispatchEvent(new CustomEvent('zerodesk:view', {detail:view}));
  if(load&&view==='booking')loadBookings(); if(view==='admin')loadAdmin();
  window.scrollTo(0,0);
 }
@@ -80,6 +81,7 @@ async function refreshSession(){
   if(!profile)await db.from('profiles').insert({id:user.id,full_name:user.user_metadata?.full_name||''});
  }
  $('adminNav').hidden=!isAdmin;
+ document.dispatchEvent(new Event('zerodesk:session'));
  await loadRooms();
 }
 // Curated illustrative photos. Replace these with real hotel room photos before commercial use.
@@ -380,7 +382,7 @@ async function loadBookings(){
  $('bookingContent').innerHTML=myBookings.length?myBookings.map(b=>{
  const r=byId[b.room_id];
  return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(r?.room_type||'Room')} · ${safe(r?.room_number||b.room_id)}</h3><p>${safe(b.check_in)} → ${safe(b.check_out)}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-pass="${b.id}">Generate check-in QR</button>`:''}${b.status==='checked_in'?`<button class="primary" data-key="${b.id}">Show demo QR</button><button class="secondary" data-checkout="${b.id}">Demo checkout</button>`:''}</div><div id="key-${b.id}"></div></div>`;
- }).join(''):'<div class="empty">No bookings yet. Choose a room from the Book tab.</div>';
+ }).join(''):'<div class="empty">No ZeroDesk test bookings yet.</div>';
  if (pendingOrderId) {
   const recoveryButton = document.createElement('button');
 
@@ -526,3 +528,6 @@ async function testRazorpayPayment(){
  }catch(error){console.error('Payment error',error);toast(error.message||'Payment error');}
  finally{if(button)button.disabled=false;}
 }
+
+
+$('testInventory').onclick = () => show('inventory');
