@@ -50,3 +50,7 @@ const stylesPath=res+'values/styles.xml';
 let styles=await readFile(stylesPath,'utf8');
 styles=styles.replace('<item name="android:background">@drawable/splash</item>','<item name="windowSplashScreenAnimatedIcon">@drawable/zerodesk</item><item name="windowSplashScreenBackground">#FFFFFF</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>');
 await writeFile(stylesPath,styles);
+const gradlePath='android/app/build.gradle';
+let appBuild=await readFile(gradlePath,'utf8');
+appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 2').replace(/versionName "[^"]+"/,'versionName "0.2.0"');
+await writeFile(gradlePath,appBuild);

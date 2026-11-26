@@ -92,17 +92,8 @@
 
     <section id="home" class="view active">
 
-      <section class="destination-hero" aria-label="Photographs of India">
-        <img id="destinationImage" alt="Taj Lake Palace, Udaipur" fetchpriority="high" width="1280" height="621" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/The_TAJ_Lake_Palace%2C_Udaipur.jpg/1280px-The_TAJ_Lake_Palace%2C_Udaipur.jpg?utm_campaign=index&amp;utm_content=thumbnail&amp;utm_source=commons.wikimedia.org">
-        <div class="destination-copy"><p class="kicker">STAYS ACROSS INDIA</p>
-          <h1>Where will you<br><em>wake up next?</em></h1>
-          <a href="#citySearch">Find your stay ↓</a>
-        </div>
-        <div class="scene-bar"><div><span id="sceneCaption">Taj Lake Palace, Udaipur</span></div>
-          <div class="scene-controls"><button id="previousScene" aria-label="Previous photograph">←</button><button id="pauseScene" aria-label="Pause slideshow">Ⅱ</button><button id="nextScene" aria-label="Next photograph">→</button></div>
-        </div>
-      </section>
       <section class="city-search" id="citySearch" aria-label="Hotel search">
+        <h1 class="stay-title">Find your stay</h1><label class="stay-query">Search hotels, cities or chains<input id="hotelQuery" type="search" form="cityForm" enterkeyhint="search" placeholder="Try Bengaluru, Taj or Whitefield" autocomplete="off"></label>
         <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">By night</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button><button type="button" data-mode="nearby" aria-pressed="false">Nearby getaways</button></div>
         <form id="cityForm">
           <label>Location<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
@@ -115,6 +106,16 @@
           <button class="primary" type="submit">Search</button>
         </form><p role="status" id="geoStatus"></p>
       </section>
+      <section class="destination-hero" aria-label="Photographs of India">
+        <img id="destinationImage" alt="Taj Lake Palace, Udaipur" fetchpriority="high" width="1280" height="621" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/The_TAJ_Lake_Palace%2C_Udaipur.jpg/1280px-The_TAJ_Lake_Palace%2C_Udaipur.jpg?utm_campaign=index&amp;utm_content=thumbnail&amp;utm_source=commons.wikimedia.org">
+        <div class="destination-copy"><p class="kicker">STAYS ACROSS INDIA</p>
+          <h2>Where will you<br><em>wake up next?</em></h2>
+          <a href="#citySearch">Find your stay ↓</a>
+        </div>
+        <div class="scene-bar"><div><span id="sceneCaption">Taj Lake Palace, Udaipur</span></div>
+          <div class="scene-controls"><button id="previousScene" aria-label="Previous photograph">←</button><button id="pauseScene" aria-label="Pause slideshow">Ⅱ</button><button id="nextScene" aria-label="Next photograph">→</button></div>
+        </div>
+      </section>
       <section id="hotelResults" class="hotel-results" aria-labelledby="hotelHeading">
         <div class="results-head"><div><p class="eyebrow">HOTELS &amp; ROOMS</p><h2 id="hotelHeading">Find a stay in India</h2><p id="hotelCount" role="status"></p></div>
         <div class="result-filters"><label>Hotel chain<select id="chainChoice"><option value="">All chains</option></select></label><label>Price order<select id="priceOrder"><option value="">Recommended</option><option value="asc">Low to high</option><option value="desc">High to low</option></select></label><label class="couple-filter"><input type="checkbox" id="coupleFilter"> Couple-friendly only</label></div></div>
@@ -122,7 +123,7 @@
         <section id="directorySection" hidden aria-labelledby="directoryTitle">
           <h3 id="directoryTitle">More hotels in the chain directory</h3>
           <p>These properties have no confirmed ZeroDesk rates or room inventory yet.</p>
-          <label>Find a hotel or destination <input type="search" id="directorySearch" placeholder="Try Whitefield or Bengaluru"></label>
+          
           <p id="directoryCount" role="status"></p>
           <ul id="directoryList"></ul><button id="directoryMore" type="button" class="secondary">Show more hotels</button>
         </section>

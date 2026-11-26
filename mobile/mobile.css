@@ -3,3 +3,15 @@ body { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
 #guestTabs button { flex:1; min-height:48px; border:0; border-radius:10px; background:white; color:#424852; font:600 14px system-ui; }
 #guestTabs [aria-current="page"] { color:#aa132a; background:#fff1f3; }
 #toast { bottom:calc(80px + env(safe-area-inset-bottom)); }
+.topbar { min-height:54px; padding:8px 14px; }
+#home { padding-bottom:18px; }
+#citySearch { border:0; border-top:4px solid var(--red); box-shadow:0 5px 16px #2820280e; }
+#home .destination-hero { min-height:190px; height:clamp(195px,50vw,330px); }
+#home .destination-copy { padding:18px 22px 52px; }
+#home .destination-copy h2 { font-size:clamp(32px,9vw,48px); margin:4px 0; }
+#home .destination-copy .kicker,#home .destination-copy>a { display:none; }
+.hotel-results { padding-block:24px; }
+#roomDialog { width:min(100%,620px); border-radius:20px; }
+#mobileAccount .form-card { display:grid; gap:14px; }
+#booking .summary-card { border-left:3px solid var(--deep); }
+#guestTabs [aria-current="page"] { box-shadow:inset 0 -3px var(--deep); }

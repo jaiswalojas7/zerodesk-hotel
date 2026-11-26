@@ -435,9 +435,9 @@ async function loadBookings(){
 }
 async function issueCheckinPass(id, checkout=false){
  const target=$('key-'+id); if(!target)return;
- target.textContent='Creating a 15-minute check-in pass…';
+ target.textContent=checkout ? 'Creating your checkout QR…' : 'Creating your check-in QR…';
  const {data,error}=await db.rpc(checkout ? 'issue_checkout_pass' : 'issue_checkin_pass',{p_booking_id:id});
- if(error){target.textContent=error.message;return;}
+ if(error){target.textContent=error.code==='PGRST202' ? 'Departure passes are temporarily unavailable. Contact hotel staff.' : error.message;return;}
  // The token is displayed only to the guest who requested it; no guest PII in the QR.
  const pass=(checkout ? 'ZDO:' : 'ZD3:')+data.token;
  target.innerHTML='<div class="alert info">Show this '+(checkout ? 'departure' : 'arrival')+' QR to hotel staff. It expires in 15 minutes and can be used once. This is a demo check-in pass, not a room key.</div><div class="qr" id="passqr-'+id+'"></div><div class="key-token" style="overflow-wrap:anywhere;color:#17202a" id="passcode-'+id+'"></div><p>Expires: '+safe(new Date(data.expires_at).toLocaleString())+'</p>';
@@ -460,7 +460,7 @@ async function loadAdmin(){
  if(error){$('adminBookings').textContent=error.message;return;}
  const bs=data||[];
  $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Demo booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
- $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span style="min-width:0;overflow-wrap:anywhere"><strong data-guest-id="${safe(b.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(b.id.slice(0,8))}</small></span><span>${safe(b.catalog_label || ('Room ' + (rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)))}</span><span>${safe(stayDates(b))}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong></div>`).join('')||'<p>No bookings.</p>';
+ $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span style="min-width:0;overflow-wrap:anywhere"><strong data-guest-id="${safe(b.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(b.id.slice(0,8))}</small></span><span>${safe(b.catalog_label || ('Room ' + (rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)))}</span><span>${safe(stayDates(b))}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong>${b.status==='checked_in' ? `<button type="button" class="secondary" data-admin-checkout="${safe(b.id)}">Check out guest</button>` : ''}</div>`).join('')||'<p>No bookings.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
  const nameLabels = Array.from($('adminBookings').querySelectorAll('[data-guest-id]'));
  const guestIds = [...new Set(nameLabels.map(label => label.dataset.guestId).filter(Boolean))];
@@ -483,6 +483,25 @@ async function loadAdmin(){
   if (name) label.textContent = name;
  }
 }
+$('adminBookings').addEventListener('click',async event=>{
+ const button=event.target.closest('[data-admin-checkout]');
+ if(!button || !isAdmin)return;
+ const id=button.dataset.adminCheckout;
+ if(!window.confirm('Check out booking '+id.slice(0,8)+' and invalidate its departure pass?'))return;
+ button.disabled=true;
+ try {
+   const {error}=await db.rpc('admin_checkout_booking',{p_booking_id:id});
+   if(error)throw error;
+   toast('Guest checked out');
+   await loadAdmin();
+ } catch {toast('Checkout could not be confirmed. Refresh the booking before retrying.');}
+ finally {button.disabled=false;}
+});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden || !currentUser)return;
+ if($('booking').classList.contains('active'))loadBookings();
+ if(isAdmin && $('admin').classList.contains('active'))loadAdmin();
+});
 async function approvePass(){
  if(!isAdmin)return toast('Staff access required');
  const pass=$('staffPass').value.trim();

@@ -89,10 +89,16 @@ function validSearch() {
   byId('arrivalHour').setCustomValidity(mode === 'hourly' && startTime() < Date.now() ? 'Choose a future arrival time in India.' : '');
   return byId('cityForm').reportValidity();
 }
+function matchesSearch(hotel) {
+  const normalize = value => value.toLowerCase().replace(/bangalore/g,'bengaluru');
+  const terms = normalize(byId('hotelQuery').value.trim()).split(/\s+/);
+  const words = normalize([hotel.name,hotel.city,hotel.chain,hotel.room || ''].join(' '));
+  return terms.every(term => words.includes(term));
+}
 function renderHotels() {
   renderDirectory();
   if (!hotels.length) return;
-  const results = hotels.filter(hotel => hotel.mode === (mode === 'hourly' ? 'hourly' : 'day') && (mode === 'nearby' ? hotel.city !== city.value : (!city.value || city.value === hotel.city))
+  const results = hotels.filter(hotel => matchesSearch(hotel) && hotel.mode === (mode === 'hourly' ? 'hourly' : 'day') && (mode === 'nearby' ? hotel.city !== city.value : (!city.value || city.value === hotel.city))
     && (!byId('chainChoice').value || hotel.chain === byId('chainChoice').value)
     && (!byId('coupleFilter').checked || hotel.couples));
   const origin = centers[city.value];
@@ -427,9 +433,8 @@ function renderDirectory(extend = false) {
   section.hidden = !directory.length || mode !== 'day' || byId('coupleFilter').checked;
   if (section.hidden) return;
   const chain = byId('chainChoice').value;
-  const term = byId('directorySearch').value.toLowerCase().trim().replace(/bangalore/g, 'bengaluru');
   const matches = directory.filter(h => (!city.value || h.city === city.value) &&
-    (!chain || chain === h.chain) && (h.name+' '+h.city).toLowerCase().includes(term));
+    (!chain || chain === h.chain) && matchesSearch(h));
   byId('directoryCount').textContent = matches.length + ' directory properties';
   byId('directoryList').replaceChildren(...matches.slice(0, directoryLimit).map(h => {
     const entry = node('li');
@@ -438,7 +443,7 @@ function renderDirectory(extend = false) {
   }));
   byId('directoryMore').hidden = directoryLimit >= matches.length;
 }
-byId('directorySearch').oninput = () => renderDirectory();
+byId('hotelQuery').oninput = renderHotels;
 byId('directoryMore').onclick = () => { directoryLimit += 24; renderDirectory(true); };
 readList('hotel-directory.json').then(data => {
   directory = data;
