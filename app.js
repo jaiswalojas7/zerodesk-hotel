@@ -1,7 +1,14 @@
 // ZeroDesk Phase 2 — Supabase-backed educational prototype.
 // Digital key and door unlock are intentionally DEMO ONLY.
 const cfg = window.ZERODESK_CONFIG;
-const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+const mobile = window.ZeroDeskAndroid;
+const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey,
+ mobile ? {auth:{flowType:'pkce',detectSessionInUrl:false}} : undefined);
+const apiFetch = (path, options) => mobile ? mobile.request(path, options) : fetch(path, options);
+const authRedirect = mobile ? mobile.callback : location.origin;
+function pendingStore() { return mobile ? localStorage : sessionStorage; }
+function pendingKey() { return mobile ? 'zerodesk_pending_booking:' + currentUser.id : 'zerodesk_pending_booking'; }
+
 let currentUser = null, rooms = [], myBookings = [], isAdmin = false;
 let recoveryMode = false;
 let scanStream=null, scanTimer=null, scanBusy=false;
@@ -30,18 +37,19 @@ $('loginBtn').onclick=async()=>{
  if(error) return toast(error.message); toast('Signed in'); await refreshSession(); show('home');
 };
 $('googleLoginBtn').onclick=async()=>{
- const {error}=await db.auth.signInWithOAuth({
+ const {data,error}=await db.auth.signInWithOAuth({
   provider:'google',
   options:{
-   redirectTo:location.origin
+   redirectTo:authRedirect, skipBrowserRedirect:Boolean(mobile)
   }
  });
  if(error) toast(error.message);
+ else if(mobile && data.url) await mobile.openAuth(data.url);
 };
 $('registerBtn').onclick=async()=>{
  const email=$('authEmail').value.trim(), password=$('authPassword').value, full_name=$('authName').value.trim();
  if(!full_name||password.length<8)return toast('Enter your name and an 8+ character password');
- const {error}=await db.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:location.origin}});
+ const {error}=await db.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:authRedirect}});
  if(error)return toast(error.message);
  $('authMessage').textContent='Registration submitted. Check your email and confirm your account before signing in.';
 };
@@ -49,7 +57,7 @@ $('forgotPasswordBtn').onclick=async()=>{
  const email=$('authEmail').value.trim();
  if(!email)return toast('Enter your registered email first');
  $('forgotPasswordBtn').disabled=true;
- const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/'});
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:mobile ? mobile.recoveryCallback : location.origin+'/'});
  $('forgotPasswordBtn').disabled=false;
  $('authMessage').textContent=error ? error.message : 'If this account exists, a recovery email has been requested. Open only the newest link.';
 };
@@ -184,7 +192,7 @@ $('staySearch').onsubmit = async event => {
  $('roomsSection').scrollIntoView({behavior:'smooth'});
  try {
   const params = new URLSearchParams({checkIn, checkOut});
-  const response = await fetch('/api/availability?' + params);
+  const response = await apiFetch('/api/availability?' + params);
   if (!response.ok) throw new Error('Availability unavailable');
   const {roomIds} = await response.json();
   if (version !== searchVersion) return;
@@ -225,9 +233,9 @@ async function reserve(roomId, catalog = null, trigger = null) {
     }
 
     const token = session.access_token;
-    const pendingOrderKey = 'zerodesk_pending_booking';
+    const pendingOrderKey = pendingKey();
 
-    const response = await fetch('/api/create-booking-order', {
+    const response = await apiFetch('/api/create-booking-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -246,7 +254,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
       throw new Error(order.error || 'Could not prepare payment');
     }
 
-    sessionStorage.setItem(pendingOrderKey, order.orderId);
+    pendingStore().setItem(pendingOrderKey, order.orderId);
     const room = rooms.find(r => r.id === roomId);
 
     const checkout = new Razorpay({
@@ -262,7 +270,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
         try {
           toast('Payment received. Verifying your booking...');
 
-          const verifyResponse = await fetch(
+          const verifyResponse = await apiFetch(
             '/api/verify-booking-payment',
             {
               method: 'POST',
@@ -277,7 +285,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
           const result = await verifyResponse.json();
 
           if (verifyResponse.ok && result.bookingConfirmed) {
-            sessionStorage.removeItem(pendingOrderKey);
+            pendingStore().removeItem(pendingOrderKey);
             toast('Payment verified! Booking confirmed.');
             await showPaidBooking(result.bookingId);
             return;
@@ -321,8 +329,8 @@ async function reserve(roomId, catalog = null, trigger = null) {
 }
 
 async function recoverBookingPayment() {
-  const orderId = sessionStorage.getItem(
-    'zerodesk_pending_booking'
+  const orderId = pendingStore().getItem(
+    pendingKey()
   );
 
   if (!orderId) {
@@ -338,7 +346,7 @@ async function recoverBookingPayment() {
 
     toast('Checking your payment…');
 
-    const response = await fetch(
+    const response = await apiFetch(
       '/api/recover-booking-payment',
       {
         method: 'POST',
@@ -353,8 +361,8 @@ async function recoverBookingPayment() {
     const result = await response.json();
 
     if (response.ok && result.bookingConfirmed) {
-      sessionStorage.removeItem(
-        'zerodesk_pending_booking'
+      pendingStore().removeItem(
+        pendingKey()
       );
 
       toast('Booking recovered successfully!');
@@ -384,8 +392,8 @@ function stayDates(b) {
 }
 async function loadBookings(){
  if(!currentUser)return;
- const pendingOrderId = sessionStorage.getItem(
-  'zerodesk_pending_booking'
+ const pendingOrderId = pendingStore().getItem(
+  pendingKey()
 );
  const {data,error}=await db.from('bookings').select('id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,total_amount,status,created_at').eq('guest_id',currentUser.id).order('created_at',{ascending:false});
  if(error){$('bookingContent').textContent=error.message;return;}
@@ -536,7 +544,7 @@ async function testRazorpayPayment(){
  if(button)button.disabled=true;
  try{
   if(typeof Razorpay==='undefined')throw new Error('Razorpay Checkout did not load');
-  const response=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const response=await apiFetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
   const order=await response.json();
   if(!response.ok||!order.orderId)throw new Error(order.error||'Could not create order');
   const checkout=new Razorpay({
@@ -544,7 +552,7 @@ async function testRazorpayPayment(){
    name:'ZeroDesk',description:'₹1 test payment',theme:{color:'#ee233b'},
    handler:async function(payment){
     try{
-     const resultResponse=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payment)});
+     const resultResponse=await apiFetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payment)});
      const result=await resultResponse.json();
      if(resultResponse.ok&&result.verified)toast('₹1 test payment verified successfully');
      else toast('Payment verification failed. Check Razorpay dashboard.');
@@ -561,3 +569,16 @@ async function testRazorpayPayment(){
 $('testInventory').onclick = () => show('inventory');
 
 $('accountMenu').onclick = () => { const menu=$('accountMenu'); menu.setAttribute('aria-expanded',String(menu.getAttribute('aria-expanded')!=='true')); };
+
+if (mobile) mobile.start({
+  session: () => currentUser,
+  view: show,
+  signOut: () => $('signOut').click(),
+  async callback(code, recovery) {
+    const {error} = await db.auth.exchangeCodeForSession(code);
+    if (error) { toast('Sign-in link could not be verified. Request a fresh link.'); return; }
+    await refreshSession();
+    if (recovery) { recoveryMode = true; show('password'); }
+  },
+  notify: toast
+});

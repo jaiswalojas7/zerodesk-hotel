@@ -154,7 +154,7 @@ function showDetails(hotel) {
   byId('detailSummary').textContent = hotel.description;
   const photo=byId('detailPhoto'); photo.hidden=!hotel.photo;
   if(hotel.photo){photo.src=hotel.photo;photo.alt=hotel.name;}
-  const share=new URL(location.pathname,location.origin);share.searchParams.set('hotel',hotel.checkoutCode);
+  const share=new URL(window.ZeroDeskAndroid?.site || location.href);share.searchParams.set('hotel',hotel.checkoutCode);
   const gallery=byId('roomPhotos');gallery.replaceChildren();
   for(const [i,url] of (hotel.gallery || []).entries()) {
     const thumb=node('button');thumb.type='button';thumb.setAttribute('aria-label','Show property photo '+(i+1));
@@ -281,7 +281,7 @@ function slideshow(photos) {
   }, 7500);
 }
 async function readList(path) {
-  const response = await fetch(path);
+  const response = path.startsWith('/api/') ? await apiFetch(path) : await fetch(path);
   if (!response.ok) throw new Error('Catalogue unavailable');
   return response.json();
 }
