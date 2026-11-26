@@ -86,9 +86,13 @@ function startTime() {
 }
 const searchDialog = byId('citySearch');
 function openSearch() {
+  byId('dialogBookingControls').append(byId('bookingControls'));
   if (!searchDialog.open) searchDialog.showModal();
   byId('hotelQuery').focus();
 }
+searchDialog.addEventListener('close', () => {
+  if (!searchDialog.open) byId('landingSearch').append(byId('bookingControls'));
+});
 byId('openStaySearch').onclick = openSearch;
 byId('closeStaySearch').onclick = () => searchDialog.close();
 

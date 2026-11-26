@@ -96,17 +96,7 @@
       <dialog class="city-search" id="citySearch" aria-labelledby="searchTitle">
         <div class="search-heading"><h2 class="stay-title" id="searchTitle">Search stays</h2><button type="button" class="secondary" id="closeStaySearch">Close</button></div>
         <label class="stay-query">Search hotels, cities or chains<input id="hotelQuery" type="search" form="cityForm" enterkeyhint="search" placeholder="Try Bengaluru, Taj or Whitefield" autocomplete="off"></label>
-        <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">By night</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button><button type="button" data-mode="nearby" aria-pressed="false">Nearby getaways</button></div>
-        <form id="cityForm">
-          <label>Location<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
-          <button type="button" id="nearMe" class="secondary">Near me</button>
-          <label>Check-in<input type="date" id="arrivalDay" required></label>
-          <label id="departureField">Check-out<input type="date" id="departureDay" required></label>
-          <label id="timeField" hidden>Arrival (IST)<select id="arrivalHour"></select></label>
-          <label id="durationField" hidden>Stay length<select id="hourCount"></select></label>
-          <details id="partyPicker"><summary id="partySummary">1 room · 2 adults · 0 children</summary><div class="party-fields"><label>Rooms<select id="guestRooms"></select></label><label>Adults<select id="guestAdults"></select></label><label>Children<select id="guestChildren"></select></label></div></details>
-          <button class="primary" type="submit">Search</button>
-        </form><p role="status" id="geoStatus"></p>
+        <div id="dialogBookingControls"></div>
       </dialog>
 
   <main class="container">
@@ -120,6 +110,21 @@
         </div>
         <div class="scene-bar"><div><span id="sceneCaption">Taj Lake Palace, Udaipur</span></div>
           <div class="scene-controls"><button id="previousScene" aria-label="Previous photograph">←</button><button id="pauseScene" aria-label="Pause slideshow">Ⅱ</button><button id="nextScene" aria-label="Next photograph">→</button></div>
+        </div>
+      </section>
+      <section class="city-search landing-booking" id="landingSearch" aria-label="Find available stays">
+        <div id="bookingControls">
+          <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">By night</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button><button type="button" data-mode="nearby" aria-pressed="false">Nearby getaways</button></div>
+          <form id="cityForm">
+            <label>Location<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
+            <button type="button" id="nearMe" class="secondary">Near me</button>
+            <label>Check-in<input type="date" id="arrivalDay" required></label>
+            <label id="departureField">Check-out<input type="date" id="departureDay" required></label>
+            <label id="timeField" hidden>Arrival (IST)<select id="arrivalHour"></select></label>
+            <label id="durationField" hidden>Stay length<select id="hourCount"></select></label>
+            <details id="partyPicker"><summary id="partySummary">1 room · 2 adults · 0 children</summary><div class="party-fields"><label>Rooms<select id="guestRooms"></select></label><label>Adults<select id="guestAdults"></select></label><label>Children<select id="guestChildren"></select></label></div></details>
+            <button class="primary" type="submit">Search</button>
+          </form><p role="status" id="geoStatus"></p>
         </div>
       </section>
       <section id="hotelResults" class="hotel-results" aria-labelledby="hotelHeading">
