@@ -52,5 +52,5 @@ styles=styles.replace('<item name="android:background">@drawable/splash</item>',
 await writeFile(stylesPath,styles);
 const gradlePath='android/app/build.gradle';
 let appBuild=await readFile(gradlePath,'utf8');
-appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 2').replace(/versionName "[^"]+"/,'versionName "0.2.0"');
+appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 3').replace(/versionName "[^"]+"/,'versionName "0.3.0"');
 await writeFile(gradlePath,appBuild);

@@ -84,9 +84,18 @@ function updateMode(value) {
 function startTime() {
   return Date.parse(arrival.value + 'T' + byId('arrivalHour').value + ':00:00+05:30');
 }
+const searchDialog = byId('citySearch');
+function openSearch() {
+  if (!searchDialog.open) searchDialog.showModal();
+  byId('hotelQuery').focus();
+}
+byId('openStaySearch').onclick = openSearch;
+byId('closeStaySearch').onclick = () => searchDialog.close();
+
 function validSearch() {
   arrival.min = dateInIndia();
   byId('arrivalHour').setCustomValidity(mode === 'hourly' && startTime() < Date.now() ? 'Choose a future arrival time in India.' : '');
+  if (!byId('cityForm').checkValidity() && !searchDialog.open) openSearch();
   return byId('cityForm').reportValidity();
 }
 function matchesSearch(hotel) {
@@ -246,6 +255,8 @@ byId('cityForm').onsubmit = event => {
   event.preventDefault();
   if (validSearch()) {
     byId('partyPicker').open=false;
+    searchDialog.close();
+    show('home');
     renderHotels();
     byId('hotelResults').scrollIntoView();
   }

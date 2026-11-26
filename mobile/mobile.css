@@ -8,7 +8,7 @@ body { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
 #citySearch { border:0; border-top:4px solid var(--red); box-shadow:0 5px 16px #2820280e; }
 #home .destination-hero { min-height:190px; height:clamp(195px,50vw,330px); }
 #home .destination-copy { padding:18px 22px 52px; }
-#home .destination-copy h2 { font-size:clamp(32px,9vw,48px); margin:4px 0; }
+#home .destination-copy h1 { font-size:clamp(32px,9vw,48px); margin:4px 0; }
 #home .destination-copy .kicker,#home .destination-copy>a { display:none; }
 .hotel-results { padding-block:24px; }
 #roomDialog { width:min(100%,620px); border-radius:20px; }

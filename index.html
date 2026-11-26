@@ -77,9 +77,14 @@
       <span class="brand-word">Zero<span>Desk</span></span>
     </div>
 
+    <div class="header-explore">
+      <button type="button" class="search-icon" id="openStaySearch" aria-label="Search stays" aria-haspopup="dialog" aria-controls="citySearch">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg>
+      </button>
+      <button class="nav-btn active" data-view="home">Explore stays</button>
+    </div>
     <button id="accountMenu" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button>
     <nav id="siteNav">
-      <button class="nav-btn active" data-view="home">Explore stays</button>
       <button class="nav-btn" data-view="booking">My bookings</button>
       <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
       <button class="nav-btn" data-view="auth" id="authNav">Sign in</button>
@@ -88,12 +93,9 @@
     </nav>
   </header>
 
-  <main class="container">
-
-    <section id="home" class="view active">
-
-      <section class="city-search" id="citySearch" aria-label="Hotel search">
-        <h1 class="stay-title">Find your stay</h1><label class="stay-query">Search hotels, cities or chains<input id="hotelQuery" type="search" form="cityForm" enterkeyhint="search" placeholder="Try Bengaluru, Taj or Whitefield" autocomplete="off"></label>
+      <dialog class="city-search" id="citySearch" aria-labelledby="searchTitle">
+        <div class="search-heading"><h2 class="stay-title" id="searchTitle">Search stays</h2><button type="button" class="secondary" id="closeStaySearch">Close</button></div>
+        <label class="stay-query">Search hotels, cities or chains<input id="hotelQuery" type="search" form="cityForm" enterkeyhint="search" placeholder="Try Bengaluru, Taj or Whitefield" autocomplete="off"></label>
         <div class="search-tabs" aria-label="Stay type"><button type="button" data-mode="day" aria-pressed="true">By night</button><button type="button" data-mode="hourly" aria-pressed="false">Hourly stays</button><button type="button" data-mode="nearby" aria-pressed="false">Nearby getaways</button></div>
         <form id="cityForm">
           <label>Location<select id="cityChoice"><option value="">All cities</option><option>Delhi</option><option>Mumbai</option><option>Pune</option><option>Jodhpur</option><option>Udaipur</option></select></label>
@@ -105,12 +107,16 @@
           <details id="partyPicker"><summary id="partySummary">1 room · 2 adults · 0 children</summary><div class="party-fields"><label>Rooms<select id="guestRooms"></select></label><label>Adults<select id="guestAdults"></select></label><label>Children<select id="guestChildren"></select></label></div></details>
           <button class="primary" type="submit">Search</button>
         </form><p role="status" id="geoStatus"></p>
-      </section>
+      </dialog>
+
+  <main class="container">
+
+    <section id="home" class="view active">
+
       <section class="destination-hero" aria-label="Photographs of India">
         <img id="destinationImage" alt="Taj Lake Palace, Udaipur" fetchpriority="high" width="1280" height="621" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/The_TAJ_Lake_Palace%2C_Udaipur.jpg/1280px-The_TAJ_Lake_Palace%2C_Udaipur.jpg?utm_campaign=index&amp;utm_content=thumbnail&amp;utm_source=commons.wikimedia.org">
         <div class="destination-copy"><p class="kicker">STAYS ACROSS INDIA</p>
-          <h2>Where will you<br><em>wake up next?</em></h2>
-          <a href="#citySearch">Find your stay ↓</a>
+          <h1>Where will you<br><em>wake up next?</em></h1>
         </div>
         <div class="scene-bar"><div><span id="sceneCaption">Taj Lake Palace, Udaipur</span></div>
           <div class="scene-controls"><button id="previousScene" aria-label="Previous photograph">←</button><button id="pauseScene" aria-label="Pause slideshow">Ⅱ</button><button id="nextScene" aria-label="Next photograph">→</button></div>
