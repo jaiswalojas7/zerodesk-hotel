@@ -205,3 +205,19 @@ dialog.city-search::backdrop { background:#20182091; }
 #home .destination-hero { border-radius:14px 14px 0 0; }
 .landing-booking { margin-top:0; border-radius:0 0 14px 14px; }
 .landing-booking .search-tabs { flex-wrap:wrap; }
+
+#discoverCities { padding:clamp(22px,4vw,56px) 0; }
+#discoverCities h2 { font:500 clamp(26px,3.4vw,44px)/1.1 Georgia,serif; letter-spacing:-.03em; margin:0 0 18px; }
+#destinationGrid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
+#destinationGrid button { position:relative; overflow:hidden; aspect-ratio:4/5; border:0; border-radius:14px; background:#59152a; text-align:left; padding:0; color:#fff; }
+#destinationGrid img { width:100%; height:100%; object-fit:cover; transition:transform .35s; }
+#destinationGrid span { position:absolute; inset:auto 0 0; padding:36px 12px 14px; background:linear-gradient(transparent,#260812e8); font:500 clamp(17px,2vw,26px) Georgia,serif; }
+#destinationGrid button:focus-visible { outline:3px solid var(--red); outline-offset:2px; }
+#directoryList li,.payment-help { border:1px solid var(--line); background:white; border-radius:12px; padding:14px; }
+#directoryList a,.directory-credit a { color:var(--deep); text-underline-offset:3px; }
+#directoryList a,.directory-credit { font-size:13px; }
+#directoryState { max-width:100%; padding:10px; background:white; border:1px solid var(--line); border-radius:8px; }
+.payment-help { line-height:1.6; margin-bottom:16px; }
+.payment-help summary { cursor:pointer; font-weight:700; }
+@media(max-width:720px){ #destinationGrid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } }
+@media(hover:hover) and (prefers-reduced-motion:no-preference){ #destinationGrid button:hover img { transform:scale(1.05); } }

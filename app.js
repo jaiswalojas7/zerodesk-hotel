@@ -1,13 +1,24 @@
 // ZeroDesk Phase 2 — Supabase-backed educational prototype.
-// Digital key and door unlock are intentionally DEMO ONLY.
 const cfg = window.ZERODESK_CONFIG;
 const mobile = window.ZeroDeskAndroid;
 const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey,
  mobile ? {auth:{flowType:'pkce',detectSessionInUrl:false}} : undefined);
 const apiFetch = (path, options) => mobile ? mobile.request(path, options) : fetch(path, options);
 const authRedirect = mobile ? mobile.callback : location.origin;
-function pendingStore() { return mobile ? localStorage : sessionStorage; }
-function pendingKey() { return mobile ? 'zerodesk_pending_booking:' + currentUser.id : 'zerodesk_pending_booking'; }
+function orderPrefix(userId) { return 'zd-payment:' + userId + ':'; }
+function pendingOrders(userId) {
+ const prefix = orderPrefix(userId);
+ const ids = Object.keys(localStorage).filter(key => key.startsWith(prefix)).map(key => key.slice(prefix.length));
+ const legacy = mobile ? localStorage.getItem('zerodesk_pending_booking:' + userId) : sessionStorage.getItem('zerodesk_pending_booking');
+ if (legacy && !ids.includes(legacy)) ids.push(legacy);
+ return ids;
+}
+function forgetOrder(userId, id) {
+ localStorage.removeItem(orderPrefix(userId) + id);
+ const store = mobile ? localStorage : sessionStorage;
+ const key = mobile ? 'zerodesk_pending_booking:' + userId : 'zerodesk_pending_booking';
+ if (store.getItem(key) === id) store.removeItem(key);
+}
 
 let currentUser = null, rooms = [], myBookings = [], isAdmin = false;
 let recoveryMode = false;
@@ -130,7 +141,7 @@ function openForm(roomId){
  const r=rooms.find(x=>x.id===roomId);if(!r)return;
  const i=rooms.indexOf(r);
  show('booking',false);
- $('bookingContent').innerHTML=`<div class="form-layout"><div class="form-card"><p class="eyebrow">YOUR RESERVATION</p><h3>${safe(r.room_type)} · Room ${safe(r.room_number)}</h3><p>Choose your dates to see the estimated room total.</p><div class="field"><label for="checkinDate">Check-in</label><input id="checkinDate" type="date" min="${today()}" value="${selectedDates.checkin||today()}"></div><div class="field"><label for="checkoutDate">Check-out</label><input id="checkoutDate" type="date" min="${today()}" value="${selectedDates.checkout||''}"></div><p id="stayEstimate" role="status"></p><div class="alert info">Test checkout. QR check-in and smart locks are for demonstration only. No real ID verification is performed.</div><button class="primary" id="reserveBtn">Proceed to payment</button></div><div class="summary-card booking-summary"><img src="${roomImage(i)}" alt="Illustrative room photograph"><div class="summary-padding"><span class="eyebrow">YOUR SELECTED ROOM</span><h3>${safe(r.room_type)}</h3><p>Room ${safe(r.room_number)}</p><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><p>Secure booking · Contactless QR check-in</p></div></div></div>`;
+ $('bookingContent').innerHTML=`<div class="form-layout"><div class="form-card"><p class="eyebrow">YOUR RESERVATION</p><h3>${safe(r.room_type)} · Room ${safe(r.room_number)}</h3><p>Choose your dates to see the estimated room total.</p><div class="field"><label for="checkinDate">Check-in</label><input id="checkinDate" type="date" min="${today()}" value="${selectedDates.checkin||today()}"></div><div class="field"><label for="checkoutDate">Check-out</label><input id="checkoutDate" type="date" min="${today()}" value="${selectedDates.checkout||''}"></div><p id="stayEstimate" role="status"></p><div class="alert info">Test checkout. Your QR pass is for staff verification.</div><button class="primary" id="reserveBtn">Proceed to payment</button></div><div class="summary-card booking-summary"><img src="${roomImage(i)}" alt="Illustrative room photograph"><div class="summary-padding"><span class="eyebrow">YOUR SELECTED ROOM</span><h3>${safe(r.room_type)}</h3><p>Room ${safe(r.room_number)}</p><p class="room-price">${money(r.price_per_night)} <small>/ night</small></p><p>Secure booking · Contactless QR check-in</p></div></div></div>`;
  $('checkinDate').onchange=()=>{selectedDates.checkin=$('checkinDate').value;$('checkoutDate').min=selectedDates.checkin;};
  $('checkoutDate').onchange=()=>{selectedDates.checkout=$('checkoutDate').value;};
  const updateEstimate = () => {
@@ -233,7 +244,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
     }
 
     const token = session.access_token;
-    const pendingOrderKey = pendingKey();
+    const paymentUserId = session.user.id;
 
     const response = await apiFetch('/api/create-booking-order', {
       method: 'POST',
@@ -254,7 +265,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
       throw new Error(order.error || 'Could not prepare payment');
     }
 
-    pendingStore().setItem(pendingOrderKey, order.orderId);
+    localStorage.setItem(orderPrefix(paymentUserId) + order.orderId, 'pending');
     const room = rooms.find(r => r.id === roomId);
 
     const checkout = new Razorpay({
@@ -285,7 +296,7 @@ async function reserve(roomId, catalog = null, trigger = null) {
           const result = await verifyResponse.json();
 
           if (verifyResponse.ok && result.bookingConfirmed) {
-            pendingStore().removeItem(pendingOrderKey);
+            forgetOrder(paymentUserId, order.orderId);
             toast('Payment verified! Booking confirmed.');
             await showPaidBooking(result.bookingId);
             return;
@@ -328,23 +339,20 @@ async function reserve(roomId, catalog = null, trigger = null) {
   }
 }
 
-async function recoverBookingPayment() {
-  const orderId = pendingStore().getItem(
-    pendingKey()
-  );
-
+async function recoverBookingPayment(orderId, message) {
+  const report = text => { message.textContent = text; };
   if (!orderId) {
-    return toast('No pending booking payment found');
+    return report('No pending booking payment found');
   }
 
   try {
     const { data: { session } } = await db.auth.getSession();
 
     if (!session?.access_token) {
-      return toast('Please sign in to recover your booking');
+      return report('Please sign in to recover your booking');
     }
 
-    toast('Checking your payment…');
+    report('Checking your payment…');
 
     const response = await apiFetch(
       '/api/recover-booking-payment',
@@ -361,25 +369,31 @@ async function recoverBookingPayment() {
     const result = await response.json();
 
     if (response.ok && result.bookingConfirmed) {
-      pendingStore().removeItem(
-        pendingKey()
-      );
+      forgetOrder(session.user.id, orderId);
 
-      toast('Booking recovered successfully!');
+      report('Booking recovered successfully!');
       await showPaidBooking(result.bookingId);
       return;
     }
 
-    toast(
-      result.error ||
+    report(
+      result.paymentMessage || result.error ||
       'Payment status is unresolved. Do not pay again.'
     );
 
   } catch (error) {
     console.error('Recovery error:', error);
-    toast('Could not check payment. Please try again later.');
+    report('Could not check payment. Please try again later.');
   }
 }
+$('lookupOrder').onsubmit = async event => {
+ event.preventDefault();
+ const form = event.currentTarget;
+ const button = form.querySelector('button');
+ button.disabled = true;
+ try { await recoverBookingPayment(form.elements.orderId.value.trim(), $('lookupStatus')); }
+ finally { button.disabled = false; }
+};
 async function showPaidBooking(id) {
  show('booking',false);
  await loadBookings();
@@ -392,16 +406,14 @@ function stayDates(b) {
 }
 async function loadBookings(){
  if(!currentUser)return;
- const pendingOrderId = pendingStore().getItem(
-  pendingKey()
-);
+ const orders = pendingOrders(currentUser.id);
  const {data,error}=await db.from('bookings').select('id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,total_amount,status,created_at').eq('guest_id',currentUser.id).order('created_at',{ascending:false});
  if(error){$('bookingContent').textContent=error.message;return;}
  myBookings=data||[];
  const byId=Object.fromEntries(rooms.map(r=>[r.id,r]));
  $('bookingContent').innerHTML=myBookings.length?myBookings.map(b=>{
  const r=byId[b.room_id];
- return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(b.catalog_label || ((r?.room_type || 'Room') + ' · ' + (r?.room_number || b.room_id)))}</h3><p>${safe(stayDates(b))}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-pass="${b.id}">Generate check-in QR</button>`:''}${b.status==='checked_in'?`<button class="primary" data-key="${b.id}">Show demo QR</button><button class="secondary" data-checkout="${b.id}">Generate checkout QR</button>`:''}</div><div id="key-${b.id}"></div></div>`;
+ return `<div class="summary-card" style="margin-bottom:14px"><p class="eyebrow">BOOKING ${safe(b.id.slice(0,8))}</p><h3>${safe(b.catalog_label || ((r?.room_type || 'Room') + ' · ' + (r?.room_number || b.room_id)))}</h3><p>${safe(stayDates(b))}</p><p>${money(b.total_amount)} · <strong>${safe(b.status)}</strong></p><div class="form-actions">${b.status==='confirmed'?`<button class="primary" data-pass="${b.id}">Generate check-in QR</button>`:''}${b.status==='checked_in'?`<button class="primary" data-checkout="${b.id}">Generate checkout QR</button>`:''}</div><div id="key-${b.id}"></div></div>`;
  }).join(''):'<div class="empty">No ZeroDesk test bookings yet.</div>';
  for(const booking of myBookings.filter(b=>b.catalog_label && b.status==='checked_out')) {
    const form=document.createElement('form');
@@ -419,19 +431,25 @@ async function loadBookings(){
    };
    $('key-'+booking.id)?.append(form);
  }
- if (pendingOrderId) {
-  const recoveryButton = document.createElement('button');
-
-  recoveryButton.className = 'primary';
-  recoveryButton.textContent = 'Recover pending payment';
-  recoveryButton.style.marginBottom = '20px';
-  recoveryButton.onclick = recoverBookingPayment;
-
-  $('bookingContent').prepend(recoveryButton);
-}
+ for (const orderId of orders) {
+   const row = document.createElement('div');
+   row.className = 'payment-help';
+   const reference = document.createElement('p');
+   reference.textContent = 'Payment reference ' + orderId;
+   const button = document.createElement('button');
+   button.className = 'secondary';
+   button.textContent = 'Check payment status';
+   const message = document.createElement('p');
+   message.setAttribute('role','status');
+   button.onclick = async () => {
+     button.disabled = true;
+     try { await recoverBookingPayment(orderId,message); } finally { button.disabled = false; }
+   };
+   row.append(reference,button,message);
+   $('bookingContent').prepend(row);
+ }
  document.querySelectorAll('[data-pass]').forEach(x=>x.onclick=()=>issueCheckinPass(x.dataset.pass));
  document.querySelectorAll('[data-checkout]').forEach(x=>x.onclick=()=>issueCheckinPass(x.dataset.checkout,true));
- document.querySelectorAll('[data-key]').forEach(x=>x.onclick=()=>demoKey(x.dataset.key));
 }
 async function issueCheckinPass(id, checkout=false){
  const target=$('key-'+id); if(!target)return;
@@ -440,26 +458,20 @@ async function issueCheckinPass(id, checkout=false){
  if(error){target.textContent=error.code==='PGRST202' ? 'Departure passes are temporarily unavailable. Contact hotel staff.' : error.message;return;}
  // The token is displayed only to the guest who requested it; no guest PII in the QR.
  const pass=(checkout ? 'ZDO:' : 'ZD3:')+data.token;
- target.innerHTML='<div class="alert info">Show this '+(checkout ? 'departure' : 'arrival')+' QR to hotel staff. It expires in 15 minutes and can be used once. This is a demo check-in pass, not a room key.</div><div class="qr" id="passqr-'+id+'"></div><div class="key-token" style="overflow-wrap:anywhere;color:#17202a" id="passcode-'+id+'"></div><p>Expires: '+safe(new Date(data.expires_at).toLocaleString())+'</p>';
+ target.innerHTML='<div class="alert info">Show this '+(checkout ? 'departure' : 'arrival')+' QR to hotel staff. It expires in 15 minutes and can be used once.</div><div class="qr" id="passqr-'+id+'"></div><div class="key-token" style="overflow-wrap:anywhere;color:#17202a" id="passcode-'+id+'"></div><p>Expires: '+safe(new Date(data.expires_at).toLocaleString())+'</p>';
  $('passcode-'+id).textContent=pass;
  new QRCode($('passqr-'+id),{text:pass,width:180,height:180});
 }
 async function changeStatus(fn,id){
  const {error}=await db.rpc(fn,{p_booking_id:id});
- if(error)return toast(error.message);toast('Demo booking updated');await loadBookings();
-}
-function demoKey(id){
- const b=myBookings.find(x=>x.id===id);if(!b||b.status!=='checked_in')return;
- const target=$('key-'+id);target.innerHTML='<div class="alert warning">DEMO QR ONLY — not a secure access credential or real door key.</div><div class="qr" id="qr-'+id+'"></div><button class="secondary" id="unlock-'+id+'">Simulate unlock</button>';
- new QRCode($('qr-'+id),{text:'ZERODESK-DEMO:'+id,width:180,height:180});
- $('unlock-'+id).onclick=()=>toast('Simulated door unlocked. No physical lock connected.');
+ if(error)return toast(error.message);toast('Booking updated');await loadBookings();
 }
 async function loadAdmin(){
  if(!isAdmin)return;
  const {data,error}=await db.from('bookings').select('id,guest_id,room_id,check_in,check_out,slot_start,slot_end,catalog_label,total_amount,status').order('check_in',{ascending:false});
  if(error){$('adminBookings').textContent=error.message;return;}
  const bs=data||[];
- $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Demo booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
+ $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Test booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
  $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span style="min-width:0;overflow-wrap:anywhere"><strong data-guest-id="${safe(b.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(b.id.slice(0,8))}</small></span><span>${safe(b.catalog_label || ('Room ' + (rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)))}</span><span>${safe(stayDates(b))}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong>${b.status==='checked_in' ? `<button type="button" class="secondary" data-admin-checkout="${safe(b.id)}">Check out guest</button>` : ''}</div>`).join('')||'<p>No bookings.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
  const nameLabels = Array.from($('adminBookings').querySelectorAll('[data-guest-id]'));

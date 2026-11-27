@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 process.chdir(fileURLToPath(new URL('.',import.meta.url)));
 await mkdir('www',{recursive:true});
-for (const file of ['app.js','config.js','hotel-search.js','style.css','hotels.json','destinations.json','hotel-directory.json','favicon.png','photo-credits.html']) {
+for (const file of ['app.js','config.js','hotel-search.js','style.css','hotels.json','destinations.json','hotel-directory.json','india-stays.json','favicon.png','photo-credits.html']) {
   await copyFile('../'+file,'www/'+file);
 }
 await copyFile('node_modules/@supabase/supabase-js/dist/umd/supabase.js','www/supabase.js');
@@ -52,5 +52,5 @@ styles=styles.replace('<item name="android:background">@drawable/splash</item>',
 await writeFile(stylesPath,styles);
 const gradlePath='android/app/build.gradle';
 let appBuild=await readFile(gradlePath,'utf8');
-appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 4').replace(/versionName "[^"]+"/,'versionName "0.3.1"');
+appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 5').replace(/versionName "[^"]+"/,'versionName "0.4.0"');
 await writeFile(gradlePath,appBuild);

@@ -102,10 +102,12 @@ function validSearch() {
   if (!byId('cityForm').checkValidity() && !searchDialog.open) openSearch();
   return byId('cityForm').reportValidity();
 }
+function normalize(value) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/bangalore/g,'bengaluru').replace(/bombay/g,'mumbai').replace(/calcutta/g,'kolkata');
+}
 function matchesSearch(hotel) {
-  const normalize = value => value.toLowerCase().replace(/bangalore/g,'bengaluru');
   const terms = normalize(byId('hotelQuery').value.trim()).split(/\s+/);
-  const words = normalize([hotel.name,hotel.city,hotel.chain,hotel.room || ''].join(' '));
+  const words = normalize([hotel.name,hotel.city,hotel.chain,hotel.state,hotel.room || ''].join(' '));
   return terms.every(term => words.includes(term));
 }
 function renderHotels() {
@@ -261,6 +263,8 @@ byId('cityForm').onsubmit = event => {
     byId('partyPicker').open=false;
     searchDialog.close();
     show('home');
+    byId('hotelResults').hidden = false;
+    loadMapDirectory();
     renderHotels();
     byId('hotelResults').scrollIntoView();
   }
@@ -309,11 +313,28 @@ async function readList(path) {
 readList('destinations.json').then(data => {
   scenes = data;
   slideshow(data);
+  for (const [cityName, index] of [['Udaipur',0],['Jodhpur',1],['Delhi',2],['Mumbai',5],['Pune',4],['Jaipur',11]]) {
+    const destination = node('button');
+    destination.type = 'button';
+    const photo = node('img');
+    photo.src = data[index].src;
+    photo.loading = 'lazy';
+    photo.alt = '';
+    destination.append(photo,node('span',cityName));
+    destination.onclick = () => {
+      if (![...city.options].some(option => option.value === cityName)) city.add(new Option(cityName,cityName));
+      city.value = cityName;
+      byId('hotelQuery').value = byId('directoryState').value = byId('chainChoice').value = '';
+      updateMode('day');
+      byId('cityForm').requestSubmit();
+    };
+    byId('destinationGrid').append(destination);
+  }
   renderHotels();
 }).catch(() => document.querySelector('.scene-controls').hidden = true);
 Promise.all([readList('hotels.json'), readList('/api/catalog-rates').catch(() => null)]).then(([data, rates]) => {
-  if (rates) for (const h of data) {
-    h.salesClosed = !Number.isFinite(rates[h.checkoutCode]);
+  for (const h of data) {
+    h.salesClosed = !Number.isFinite(rates?.[h.checkoutCode]);
     if (!h.salesClosed) h.testRate = rates[h.checkoutCode];
   }
   hotels = data;
@@ -441,19 +462,45 @@ function resumeCheckout() {
 document.addEventListener('zerodesk:session',resumeCheckout);
 
 let directory = [];
+let mappedStays = [];
+let directoryLoad;
+let directoryError = false;
+function loadMapDirectory() {
+  if (directoryLoad) return directoryLoad;
+  directoryLoad = readList('india-stays.json').then(groups => {
+    for (const [state,rows] of Object.entries(groups)) {
+      byId('directoryState').add(new Option(state,state));
+      for (const [name,city,kind,id] of rows) mappedStays.push({name,city,state,kind,id});
+    }
+    directoryError = false;
+    renderDirectory();
+  }).catch(() => { directoryLoad = null; directoryError = true; renderDirectory(); });
+  return directoryLoad;
+}
+byId('directoryState').onchange = () => renderDirectory();
 let directoryLimit = 24;
 function renderDirectory(extend = false) {
   if (!extend) directoryLimit = 24;
   const section = byId('directorySection');
-  section.hidden = !directory.length || mode !== 'day' || byId('coupleFilter').checked;
+  section.hidden = (!directory.length && !mappedStays.length && !directoryError) || mode !== 'day' || byId('coupleFilter').checked;
   if (section.hidden) return;
   const chain = byId('chainChoice').value;
-  const matches = directory.filter(h => (!city.value || h.city === city.value) &&
+  const region = byId('directoryState').value;
+  const place = normalize(city.value);
+  const matches = directory.concat(mappedStays).filter(h => (!region || h.state === region) &&
+    (!place || normalize(h.city || '').includes(place) || normalize(h.state || '') === place) &&
     (!chain || chain === h.chain) && matchesSearch(h));
-  byId('directoryCount').textContent = matches.length + ' directory properties';
+  byId('directoryCount').textContent = matches.length.toLocaleString('en-IN') + ' directory listings' + (directoryError ? ' · National directory unavailable. Search again to retry.' : '');
   byId('directoryList').replaceChildren(...matches.slice(0, directoryLimit).map(h => {
     const entry = node('li');
-    entry.append(node('strong', h.name), node('small', h.chain + ' · ' + h.city));
+    entry.append(node('strong', h.name), node('small', [h.chain || h.kind,h.city,h.state].filter(Boolean).join(' · ')));
+    if (h.id) {
+      const link = node('a','View on map');
+      link.href = 'https://www.openstreetmap.org/' + h.id;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      entry.append(link);
+    }
     return entry;
   }));
   byId('directoryMore').hidden = directoryLimit >= matches.length;
