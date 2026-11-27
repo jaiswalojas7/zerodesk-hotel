@@ -295,3 +295,19 @@ footer .footer-brand span { color:#ffc8c9; }
 .account-edit label { display:grid; gap:4px; font-weight:650; }
 .account-edit input { border:1px solid var(--line); border-radius:8px; padding:10px; }
 #contactEditor summary { cursor:pointer; color:var(--deep); font-weight:700; }
+
+.account-block { border-top:1px solid var(--line); padding-block:18px; }
+.account-block p,.footer-copy p { line-height:1.55; }
+.account-block a,footer a { overflow-wrap:anywhere; }
+.footer-copy { max-width:54ch; }
+footer { display:flex; gap:24px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; }
+#themeToggle { border:1px solid var(--line); min-height:44px; }
+#themeToggle[aria-pressed="true"] { box-shadow:inset 3px 0 #fc647a; }
+html[data-theme="dark"] { color-scheme:dark; --bg:#151318; --ink:#f7f1f4; --muted:#c4b7bd; --line:#4a3c45; --white:#252027; --deep:#ff9aae; }
+html[data-theme="dark"] body { background:var(--bg); color:var(--ink); }
+html[data-theme="dark"] :is(.topbar,.account-sheet,.city-search,#landingSearch,#roomDialog,.detail-heading,.property-card,.property-body,.summary-card,.form-card,.payment-help,.admin-panel,.room-card,.stat,.booking-row,.room-status,#guestTabs,#guestTabs button,.stay-table th,.alert,.empty,.amenity-list li,#providerNote) { background-color:var(--white); color:var(--ink); border-color:var(--line); }
+html[data-theme="dark"] :is(button.secondary,.nav-btn,.search-tabs button,.filter-chip,#accountMenu,#partyPicker summary,input,select,textarea,.google-login-btn,.hero-search) { background-color:#302a31; color:var(--ink); border-color:var(--line); }
+html[data-theme="dark"] :is(.nav-btn.active,.search-tabs [aria-pressed="true"],#guestTabs [aria-current="page"],.filter-chip.active,.primary) { background-color:#a81739; color:white; }
+html[data-theme="dark"] :is(.identity dt,.stay-query,.property-body p,.field label,.summary-card p,.form-card p,.detail-heading p,.city-search label,.hotel-results p,.section-head p) { color:var(--muted); }
+html[data-theme="dark"] :is(.property-body h3,.stay-title,.detail-heading h2,.account-sheet h2,.property-body strong) { color:var(--ink); }
+html[data-theme="dark"] footer { background:#371521; }

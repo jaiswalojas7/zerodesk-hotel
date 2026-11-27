@@ -3,6 +3,14 @@
 <head>
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta charset="UTF-8" />
+  <script>
+    (() => {
+      let preferred;
+      try { preferred = localStorage.getItem('zerodesk-theme'); } catch {}
+      document.documentElement.dataset.theme = ['dark','light'].includes(preferred)
+        ? preferred : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZeroDesk | Hotel rooms and hourly stays in India</title>
   <meta name="description" content="Explore Indian city hotels, compare room facilities and guest policies, and plan overnight or hourly stays.">
@@ -86,11 +94,7 @@
     <button id="accountMenu" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button>
     <nav id="siteNav">
       <button class="nav-btn" data-view="booking">My bookings</button>
-      <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin</button>
-      <button class="nav-btn" data-view="account" id="accountNav" hidden>Account</button>
-      <button class="nav-btn" data-view="auth" id="authNav">Sign in</button>
-      <button class="secondary" id="changePasswordNav" hidden>Change password</button>
-      <button class="secondary" id="signOut" hidden>Sign out</button>
+      <button class="nav-btn" data-view="account" id="accountNav">Account</button>
     </nav>
   </header>
 
@@ -295,6 +299,11 @@
       <div class="account-sheet">
         <img src="favicon.png" width="54" height="54" alt="">
         <h2 id="accountTitle">Your account</h2>
+        <section class="account-block" aria-label="Appearance">
+          <button class="secondary" type="button" id="themeToggle" aria-pressed="false">Dark mode</button>
+        </section>
+        <button class="nav-btn" id="authNav" data-view="auth">Sign in to your account</button>
+        <section id="memberDetails" class="account-block" hidden>
         <dl class="identity"><dt>Name</dt><dd id="accountName"></dd><dt>Email</dt><dd id="accountEmail"></dd>
           <dt>Mobile number</dt><dd id="accountPhone"></dd><dt>Account ID</dt><dd id="accountId"></dd></dl>
         <details id="contactEditor"><summary>Edit contact details</summary>
@@ -303,8 +312,13 @@
           <button class="secondary">Save details</button><p role="status" id="contactStatus"></p></form></details>
         <h3>Your orders</h3><p id="accountOrders" role="status"></p>
         <button class="primary" id="accountBookings">View my bookings</button>
-        <div class="account-actions"><button class="secondary" id="accountPassword">Change password</button>
-        <button class="secondary" id="accountLogout">Sign out</button></div>
+        <div class="account-actions"><button class="secondary" id="changePasswordNav">Change password</button>
+        <button class="secondary" id="signOut">Sign out</button>
+        <button class="nav-btn" data-view="admin" id="adminNav" hidden>Admin portal</button></div>
+        </section>
+        <section class="account-block"><h3>Contact us</h3>
+        <p>For booking, payment or account questions, email our support team. Include your booking reference if you have one.</p>
+        <a href="mailto:zerodeskhotel@gmail.com?subject=ZeroDesk%20support">zerodeskhotel@gmail.com</a></section>
       </div>
     </section>
     <!-- BOOKING -->
@@ -409,7 +423,10 @@
   <footer>
     <div class="footer-brand">Zero<span>Desk</span></div>
 
-    <p>Hotel stays across India · Test checkout</p>
+    <div class="footer-copy"><strong>Hotel stays across India</strong>
+      <p>Find a city stay for the night or a room for a few hours. Compare amenities and guest policies, keep your bookings together, and access your arrival and departure passes from My bookings.</p>
+      <small>Checkout currently uses test payments.</small></div>
+    <div><strong>Contact us</strong><p><a href="mailto:zerodeskhotel@gmail.com">zerodeskhotel@gmail.com</a></p></div>
   </footer>
 
 

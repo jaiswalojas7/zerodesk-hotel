@@ -32,7 +32,7 @@ function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('
 function show(view, load=true){
  $('accountMenu').setAttribute('aria-expanded','false');
  if(view==='admin'&&!isAdmin){toast('Admin access required');return;}
- if((view==='booking'||view==='account')&&!currentUser)view='auth';
+ if(view==='booking'&&!currentUser)view='auth';
  if(view==='password'&&!currentUser){toast('Sign in or open a valid recovery link first');return;}
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
  document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
@@ -91,8 +91,18 @@ $('updatePasswordBtn').onclick=async()=>{
 };
 $('signOut').onclick=async()=>{await db.auth.signOut(); await refreshSession(); show('home');};
 $('accountBookings').onclick=()=>show('booking');
-$('accountPassword').onclick=()=>$('changePasswordNav').click();
-$('accountLogout').onclick=()=>$('signOut').click();
+const themeToggle = $('themeToggle');
+function displayTheme(theme) {
+ document.documentElement.dataset.theme = theme;
+ themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+ themeToggle.textContent = theme === 'dark' ? 'Dark mode · On' : 'Dark mode · Off';
+}
+displayTheme(document.documentElement.dataset.theme);
+themeToggle.onclick = () => {
+ const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+ displayTheme(next);
+ try { localStorage.setItem('zerodesk-theme', next); } catch {}
+};
 $('contactForm').onsubmit=async event=>{
  event.preventDefault();
  const user=currentUser;
@@ -137,8 +147,8 @@ async function loadAccount(){
 }
 async function refreshSession(){
  const {data:{user}}=await db.auth.getUser(); currentUser=user;
- $('accountNav').hidden=!user;
- if(!user){for(const id of ['accountName','accountEmail','accountId','accountPhone','accountOrders'])$(id).textContent='';if($('account').classList.contains('active'))show('auth');}
+ $('memberDetails').hidden=!user;
+ if(!user){for(const id of ['accountName','accountEmail','accountId','accountPhone','accountOrders'])$(id).textContent='';$('contactName').value='';$('contactPhone').value='';}
  $('authNav').hidden=!!user; $('signOut').hidden=!user; $('changePasswordNav').hidden=!user;
  isAdmin=false;
  if(user){
@@ -470,9 +480,11 @@ async function loadBookings(){
    form.onsubmit=async event=>{
      event.preventDefault();
      const button=form.querySelector('button'), message=form.querySelector('[role=status]');
+     const comment=form.querySelector('textarea').value.trim();
+     if(!comment){message.textContent='Write a few words about your stay first.';return;}
      button.disabled=true;
      try {
-       const {error}=await db.from('stay_reviews').insert({booking_id:booking.id,rating:Number(form.querySelector('select').value),comment:form.querySelector('textarea').value.trim()});
+       const {error}=await db.from('stay_reviews').insert({booking_id:booking.id,rating:Number(form.querySelector('select').value),comment});
        message.textContent=error ? error.code==='23505' ? 'You already reviewed this stay.' : 'Could not publish this review.' : 'Review published.';
        button.disabled=!error || error.code==='23505';
      } catch {message.textContent='Could not publish this review.';button.disabled=false;}
