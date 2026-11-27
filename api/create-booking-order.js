@@ -1,4 +1,5 @@
 const Razorpay = require("razorpay");
+const {createCatalogOrder} = require("../server/catalog-checkout");
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -53,13 +54,25 @@ module.exports = async (req, res) => {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-    if (!SUPABASE_URL || !SERVICE_KEY || !keyId || !keySecret) {
-      console.error("Booking order configuration is missing.");
+    const configStatus = {
+  SUPABASE_URL: Boolean(SUPABASE_URL),
+  SUPABASE_SERVICE_ROLE_KEY: Boolean(SERVICE_KEY),
+  RAZORPAY_KEY_ID: Boolean(keyId),
+  RAZORPAY_KEY_SECRET: Boolean(keySecret)
+};
 
-      return res.status(500).json({
-        error: "Server configuration missing"
-      });
-    }
+if (
+  !configStatus.SUPABASE_URL ||
+  !configStatus.SUPABASE_SERVICE_ROLE_KEY ||
+  !configStatus.RAZORPAY_KEY_ID ||
+  !configStatus.RAZORPAY_KEY_SECRET
+) {
+  console.error("Booking order configuration status:", configStatus);
+
+  return res.status(500).json({
+    error: "Server configuration missing"
+  });
+}
 
     // Verify the signed-in guest.
     const token = (req.headers.authorization || "")
@@ -100,6 +113,13 @@ module.exports = async (req, res) => {
     if (!user || !user.id) {
       return res.status(401).json({
         error: "Invalid session"
+      });
+    }
+
+    if (req.body?.catalogCode) {
+      return await createCatalogOrder(req.body, res, {
+        user, keyId, base:SUPABASE_URL, headers:serverHeaders(),
+        razorpay:new Razorpay({key_id:keyId, key_secret:keySecret})
       });
     }
 
