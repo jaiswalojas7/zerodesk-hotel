@@ -47,7 +47,7 @@ byId('nearMe').onclick = () => {
 };
 
 let hotels = [];
-let scenes = [];
+
 
 function syncDates() {
   arrival.min = dateInIndia();
@@ -93,7 +93,7 @@ function openSearch() {
 searchDialog.addEventListener('close', () => {
   if (!searchDialog.open) byId('landingSearch').append(byId('bookingControls'));
 });
-byId('openStaySearch').onclick = openSearch;
+byId('openStaySearch').onclick = byId('heroSearch').onclick = openSearch;
 byId('closeStaySearch').onclick = () => searchDialog.close();
 
 function validSearch() {
@@ -111,7 +111,6 @@ function matchesSearch(hotel) {
   return terms.every(term => words.includes(term));
 }
 function renderHotels() {
-  renderDirectory();
   if (!hotels.length) return;
   const results = hotels.filter(hotel => matchesSearch(hotel) && hotel.mode === (mode === 'hourly' ? 'hourly' : 'day') && (mode === 'nearby' ? hotel.city !== city.value : (!city.value || city.value === hotel.city))
     && (!byId('chainChoice').value || hotel.chain === byId('chainChoice').value)
@@ -124,7 +123,6 @@ function renderHotels() {
   target.replaceChildren();
   byId('hotelHeading').textContent = (mode === 'hourly' ? 'Hourly stays' : 'Hotels') + ' in ' + (city.value || 'India');
   if(mode==='nearby') byId('hotelHeading').textContent = 'Getaways from '+(city.value || 'your city');
-  byId('roomResultsLink').textContent = results.length + ' room listings';
   byId('hotelCount').textContent = results.length + (results.length === 1 ? ' room listing' : ' room listings') +
     (mode === 'hourly' ? ' · Choose a time and duration to see your total.' : ' · Select a room for rates and availability.');
   for (const hotel of results) {
@@ -132,16 +130,10 @@ function renderHotels() {
     const figure = node('figure');
     const img = node('img');
     img.loading = 'lazy';
-    const scene = scenes.find(photo => photo.topic.includes(hotel.city));
-    if (hotel.photo || scene) {
-      img.src = hotel.photo || scene.src;
-      img.alt = hotel.photo ? hotel.name : scene.topic;
+    if (hotel.photo) {
+      img.src = hotel.photo;
+      img.alt = hotel.name;
       figure.append(img);
-      if (!hotel.photo && scene) {
-        const credit = node('span');
-        credit.textContent = scene.topic;
-        figure.append(credit);
-      }
     }
     const body = node('div', null, 'property-body');
     const location = node('p', hotel.city + (mode==='nearby' && origin ? ' · '+Math.round(distance(origin,centers[hotel.city]))+' km from '+city.value : ''), 'eyebrow');
@@ -265,7 +257,6 @@ byId('cityForm').onsubmit = event => {
     searchDialog.close();
     show('home');
     byId('hotelResults').hidden = false;
-    loadMapDirectory();
     renderHotels();
     byId('hotelResults').scrollIntoView();
   }
@@ -311,29 +302,35 @@ async function readList(path) {
   if (!response.ok) throw new Error('Catalogue unavailable');
   return response.json();
 }
-readList('destinations.json').then(data => {
-  scenes = data;
-  slideshow(data);
-  for (const [cityName, index] of [['Udaipur',0],['Jodhpur',1],['Delhi',2],['Mumbai',5],['Pune',4],['Jaipur',11]]) {
+function displayDestinations(data) {
+  const featured = ['Udaipur','Jodhpur','Delhi','Mumbai','Pune','Jaipur']
+    .map(cityName => data.find(hotel => hotel.city === cityName && hotel.photo))
+    .filter(Boolean);
+  slideshow(featured.map(hotel => ({src:hotel.photo,title:hotel.name,topic:hotel.name + ' · ' + hotel.city})));
+  for (const hotel of featured) {
+    const cityName = hotel.city;
     const destination = node('button');
     destination.type = 'button';
     const photo = node('img');
-    photo.src = data[index].src;
+    photo.src = hotel.photo;
     photo.loading = 'lazy';
     photo.alt = '';
     destination.append(photo,node('span',cityName));
     destination.onclick = () => {
       if (![...city.options].some(option => option.value === cityName)) city.add(new Option(cityName,cityName));
       city.value = cityName;
-      byId('hotelQuery').value = byId('directoryState').value = byId('chainChoice').value = '';
+      byId('hotelQuery').value = byId('chainChoice').value = '';
       updateMode('day');
       byId('cityForm').requestSubmit();
     };
     byId('destinationGrid').append(destination);
   }
-  renderHotels();
-}).catch(() => document.querySelector('.scene-controls').hidden = true);
-Promise.all([readList('hotels.json'), readList('/api/catalog-rates').catch(() => null)]).then(([data, rates]) => {
+}
+const catalogue = readList('hotels.json').then(data => {
+  displayDestinations(data);
+  return data;
+});
+Promise.all([catalogue, readList('/api/catalog-rates').catch(() => null)]).then(([data, rates]) => {
   for (const h of data) {
     h.salesClosed = !Number.isFinite(rates?.[h.checkoutCode]);
     if (!h.salesClosed) h.testRate = rates[h.checkoutCode];
@@ -462,70 +459,4 @@ function resumeCheckout() {
 }
 document.addEventListener('zerodesk:session',resumeCheckout);
 
-let directory = [];
-const directoryPhotos = {
-  "node/7605321385": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Kochi_Marriott_Hotel_at_night.jpg/500px-Kochi_Marriott_Hotel_at_night.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org",
-  "way/40309557": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Hotel_Marine_Plaza%2C_Marine_Drive%2C_Mumbai.jpg/500px-Hotel_Marine_Plaza%2C_Marine_Drive%2C_Mumbai.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org",
-  "way/1096215755": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/The_Leela_Palace_Chennai.jpg/960px-The_Leela_Palace_Chennai.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org"
-};
-let mappedStays = [];
-let directoryLoad;
-let directoryError = false;
-function loadMapDirectory() {
-  if (directoryLoad) return directoryLoad;
-  directoryLoad = Promise.all([readList('india-stays.json'),readList('geonames-hotels.json')]).then(([groups, extra]) => {
-    const regions = new Set(Object.keys(groups));
-    for (const [name,city,state] of extra) {
-      mappedStays.push({name,city,state,kind:'hotel'});
-      regions.add(state);
-    }
-    for (const region of [...regions].sort()) byId('directoryState').add(new Option(region,region));
-    for (const [state,rows] of Object.entries(groups)) {
-      for (const [name,city,kind,id] of rows) mappedStays.push({name,city,state,kind,id});
-    }
-    directoryError = false;
-    renderDirectory();
-  }).catch(() => { directoryLoad = null; directoryError = true; renderDirectory(); });
-  return directoryLoad;
-}
-byId('directoryState').onchange = () => renderDirectory();
-let directoryLimit = 24;
-function renderDirectory(extend = false) {
-  if (!extend) directoryLimit = 24;
-  const section = byId('directorySection');
-  section.hidden = (!directory.length && !mappedStays.length && !directoryError) || mode !== 'day' || byId('coupleFilter').checked;
-  byId('directoryLink').hidden = section.hidden;
-  if (section.hidden) return;
-  const chain = byId('chainChoice').value;
-  const region = byId('directoryState').value;
-  const place = normalize(city.value);
-  const matches = directory.concat(mappedStays).filter(h => (!region || h.state === region) &&
-    (!place || normalize(h.city || '').includes(place) || normalize(h.state || '') === place) &&
-    (!chain || chain === h.chain) && matchesSearch(h));
-  byId('directoryLink').textContent = 'Browse '+matches.length.toLocaleString('en-IN')+' directory listings';
-  byId('directoryCount').textContent = matches.length.toLocaleString('en-IN') + ' directory listings' + (directoryError ? ' · National directory unavailable. Search again to retry.' : '');
-  byId('directoryList').replaceChildren(...matches.slice(0, directoryLimit).map(h => {
-    const entry = node('li');
-    entry.append(node('strong', h.name), node('small', [h.chain || h.kind,h.city,h.state].filter(Boolean).join(' · ')));
-    if (directoryPhotos[h.id]) {
-      const photo = node('img');
-      photo.src = directoryPhotos[h.id];
-      photo.alt = h.name;
-      photo.loading = 'lazy';
-      photo.className = 'directory-photo';
-      photo.onerror = () => photo.remove();
-      entry.prepend(photo);
-    }
-    return entry;
-  }));
-  byId('directoryMore').hidden = directoryLimit >= matches.length;
-}
 byId('hotelQuery').oninput = renderHotels;
-byId('directoryMore').onclick = () => { directoryLimit += 24; renderDirectory(true); };
-readList('hotel-directory.json').then(data => {
-  directory = data;
-  for (const destination of [...new Set(data.map(h => h.city))].sort()) {
-    if (![...city.options].some(option => option.value === destination)) city.add(new Option(destination, destination));
-  }
-  renderDirectory();
-}).catch(() => renderDirectory());

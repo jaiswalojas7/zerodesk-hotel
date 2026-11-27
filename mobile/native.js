@@ -43,21 +43,13 @@ window.ZeroDeskAndroid = {
   openAuth: url => Browser.open({url}),
   async start({session, view, signOut, callback: finishAuth, notify}) {
     const tabs = document.getElementById('guestTabs');
-    const account = document.getElementById('mobileAccount');
-    const syncAccount = () => {
-      account.querySelector('p').textContent = session()?.email || '';
-      if (!session() && account.classList.contains('active')) view('auth');
-    };
     tabs.onclick = event => {
       const target = event.target.closest('button')?.dataset.tab;
-      if (target) view(target === 'account' ? (session() ? 'mobileAccount' : 'auth') : target);
+      if (target) view(target);
     };
-    account.querySelector('[data-action="signout"]').onclick = signOut;
-    account.querySelector('[data-action="password"]').onclick = () => view('password');
-    document.addEventListener('zerodesk:session', syncAccount);
     document.addEventListener('zerodesk:view', ({detail}) => {
       for (const button of tabs.querySelectorAll('button')) {
-        const active = button.dataset.tab === detail || (button.dataset.tab === 'account' && ['auth','password','mobileAccount'].includes(detail));
+        const active = button.dataset.tab === detail || (button.dataset.tab === 'account' && ['auth','password','account'].includes(detail));
         button.setAttribute('aria-current', active ? 'page' : 'false');
       }
     });
@@ -74,7 +66,7 @@ window.ZeroDeskAndroid = {
     }
     await App.addListener('appUrlOpen', receive);
     const initial = await App.getLaunchUrl();
-    if (initial) await receive(initial);
+    if (initial?.url) await receive(initial);
     await App.addListener('backButton', () => {
       const dialog = document.querySelector('dialog[open]');
       if (dialog) dialog.close();

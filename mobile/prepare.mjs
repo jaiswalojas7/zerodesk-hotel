@@ -1,11 +1,12 @@
-import {readFile, writeFile, mkdir, copyFile, access} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, copyFile, access, rm} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {build} from 'esbuild';
 import {fileURLToPath} from 'node:url';
 
 process.chdir(fileURLToPath(new URL('.',import.meta.url)));
 await mkdir('www',{recursive:true});
-for (const file of ['app.js','config.js','hotel-search.js','style.css','hotels.json','destinations.json','hotel-directory.json','india-stays.json','geonames-hotels.json','favicon.png','photo-credits.html']) {
+for (const obsolete of ['hotel-directory.json','india-stays.json','geonames-hotels.json','destinations.json','photo-credits.html']) await rm('www/'+obsolete,{force:true});
+for (const file of ['app.js','config.js','hotel-search.js','style.css','hotels.json','favicon.png']) {
   await copyFile('../'+file,'www/'+file);
 }
 await copyFile('node_modules/@supabase/supabase-js/dist/umd/supabase.js','www/supabase.js');
@@ -18,9 +19,7 @@ const html = template.replace('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcod
  .replace('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js','supabase.js')
  .replace('</head>','<link rel="stylesheet" href="mobile.css"></head>')
  .replace('<script src="app.js">','<script src="native.js"></script><script src="app.js">')
- .replace('</main>',`<section class="view" id="mobileAccount"><div class="form-card"><h2>Account</h2><p></p>
- <button class="secondary" data-action="password">Change password</button>
- <button class="secondary" data-action="signout">Sign out</button></div></section></main>
+ .replace('</main>',`</main>
  <nav id="guestTabs" aria-label="Guest navigation"><button data-tab="home" aria-current="page">Explore</button>
  <button data-tab="booking">My bookings</button><button data-tab="account">Account</button></nav>`);
 if (!html.includes('id="guestTabs"') || !html.includes('src="native.js"')) throw Error('Guest navigation or native bridge missing');
@@ -52,5 +51,5 @@ styles=styles.replace('<item name="android:background">@drawable/splash</item>',
 await writeFile(stylesPath,styles);
 const gradlePath='android/app/build.gradle';
 let appBuild=await readFile(gradlePath,'utf8');
-appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 6').replace(/versionName "[^"]+"/,'versionName "0.4.1"');
+appBuild=appBuild.replace(/versionCode \d+/, 'versionCode 7').replace(/versionName "[^"]+"/,'versionName "0.5.0"');
 await writeFile(gradlePath,appBuild);

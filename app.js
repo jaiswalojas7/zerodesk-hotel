@@ -32,12 +32,13 @@ function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('
 function show(view, load=true){
  $('accountMenu').setAttribute('aria-expanded','false');
  if(view==='admin'&&!isAdmin){toast('Admin access required');return;}
- if(view==='booking'&&!currentUser)view='auth';
+ if((view==='booking'||view==='account')&&!currentUser)view='auth';
  if(view==='password'&&!currentUser){toast('Sign in or open a valid recovery link first');return;}
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
  document.querySelectorAll('.nav-btn').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
  if(view!=='admin')stopScanner();
  document.dispatchEvent(new CustomEvent('zerodesk:view', {detail:view}));
+ if(view==='account')loadAccount();
  if(load&&view==='booking')loadBookings(); if(view==='admin')loadAdmin();
  window.scrollTo(0,0);
 }
@@ -89,8 +90,55 @@ $('updatePasswordBtn').onclick=async()=>{
  history.replaceState(null,'',location.pathname);
 };
 $('signOut').onclick=async()=>{await db.auth.signOut(); await refreshSession(); show('home');};
+$('accountBookings').onclick=()=>show('booking');
+$('accountPassword').onclick=()=>$('changePasswordNav').click();
+$('accountLogout').onclick=()=>$('signOut').click();
+$('contactForm').onsubmit=async event=>{
+ event.preventDefault();
+ const user=currentUser;
+ if(!user)return;
+ const full_name=$('contactName').value.trim(), phone=$('contactPhone').value.trim();
+ if(!full_name || (phone && !/^\+?[0-9 ()-]{7,20}$/.test(phone))){
+   $('contactStatus').textContent='Enter your name and a valid mobile number.';return;
+ }
+ const button=event.currentTarget.querySelector('button');button.disabled=true;
+ try {
+   const {error}=await db.from('profiles').upsert({id:user.id,full_name,phone:phone || null},{onConflict:'id'});
+   if(error)throw error;
+   if(currentUser?.id===user.id){await loadAccount();$('contactStatus').textContent='Details saved.';}
+ } catch {if(currentUser?.id===user.id)$('contactStatus').textContent='Could not save details. Please try again.';}
+ finally {button.disabled=false;}
+};
+async function loadAccount(){
+ const user=currentUser;
+ if(!user)return;
+ $('contactEditor').open=false;
+ $('contactStatus').textContent='';
+ $('contactName').value='';$('contactPhone').value='';
+ $('accountId').textContent=user.id;
+ $('accountEmail').textContent=user.email || 'Not provided';
+ $('accountName').textContent=user.user_metadata?.full_name || user.user_metadata?.name || 'Not provided';
+ $('accountPhone').textContent=user.phone || 'Not provided';
+ $('accountOrders').textContent='Loading your bookings…';
+ const [profile,orders]=await Promise.allSettled([
+   db.from('profiles').select('full_name,phone').eq('id',user.id).maybeSingle(),
+   db.from('bookings').select('id',{count:'exact',head:true}).eq('guest_id',user.id)
+ ]);
+ if(currentUser?.id!==user.id)return;
+ if(profile.status==='fulfilled' && profile.value.data){
+   const {full_name,phone}=profile.value.data;
+   if(full_name)$('accountName').textContent=full_name;
+   if(phone)$('accountPhone').textContent=phone;
+ }
+ $('contactName').value=$('accountName').textContent==='Not provided'?'':$('accountName').textContent;
+ $('contactPhone').value=$('accountPhone').textContent==='Not provided'?'':$('accountPhone').textContent;
+ const count=orders.status==='fulfilled' ? orders.value.count : null;
+ $('accountOrders').textContent=Number.isInteger(count) ? count+' '+(count===1?'reservation':'reservations') : 'Open My bookings to check your orders.';
+}
 async function refreshSession(){
  const {data:{user}}=await db.auth.getUser(); currentUser=user;
+ $('accountNav').hidden=!user;
+ if(!user){for(const id of ['accountName','accountEmail','accountId','accountPhone','accountOrders'])$(id).textContent='';if($('account').classList.contains('active'))show('auth');}
  $('authNav').hidden=!!user; $('signOut').hidden=!user; $('changePasswordNav').hidden=!user;
  isAdmin=false;
  if(user){
