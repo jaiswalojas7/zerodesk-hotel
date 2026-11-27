@@ -124,7 +124,8 @@ function renderHotels() {
   target.replaceChildren();
   byId('hotelHeading').textContent = (mode === 'hourly' ? 'Hourly stays' : 'Hotels') + ' in ' + (city.value || 'India');
   if(mode==='nearby') byId('hotelHeading').textContent = 'Getaways from '+(city.value || 'your city');
-  byId('hotelCount').textContent = results.length + (results.length === 1 ? ' property' : ' properties') +
+  byId('roomResultsLink').textContent = results.length + ' room listings';
+  byId('hotelCount').textContent = results.length + (results.length === 1 ? ' room listing' : ' room listings') +
     (mode === 'hourly' ? ' · Choose a time and duration to see your total.' : ' · Select a room for rates and availability.');
   for (const hotel of results) {
     const card = node('article', null, 'property-card');
@@ -165,7 +166,7 @@ function renderHotels() {
     card.append(figure, body);
     target.append(card);
   }
-  if (!results.length) target.append(node('p', 'No matching hotels. Change the city or clear the couple-friendly filter.'));
+  if (!results.length) target.append(node('p', 'No matching rooms with listed rates.'));
 }
 const rupees = value => new Intl.NumberFormat('en-IN', {style:'currency', currency:'INR', maximumFractionDigits:0}).format(value);
 function showDetails(hotel) {
@@ -462,14 +463,24 @@ function resumeCheckout() {
 document.addEventListener('zerodesk:session',resumeCheckout);
 
 let directory = [];
+const directoryPhotos = {
+  "node/7605321385": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Kochi_Marriott_Hotel_at_night.jpg/500px-Kochi_Marriott_Hotel_at_night.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org",
+  "way/40309557": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Hotel_Marine_Plaza%2C_Marine_Drive%2C_Mumbai.jpg/500px-Hotel_Marine_Plaza%2C_Marine_Drive%2C_Mumbai.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org",
+  "way/1096215755": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/The_Leela_Palace_Chennai.jpg/960px-The_Leela_Palace_Chennai.jpg?utm_campaign=index&utm_content=thumbnail&utm_source=commons.wikimedia.org"
+};
 let mappedStays = [];
 let directoryLoad;
 let directoryError = false;
 function loadMapDirectory() {
   if (directoryLoad) return directoryLoad;
-  directoryLoad = readList('india-stays.json').then(groups => {
+  directoryLoad = Promise.all([readList('india-stays.json'),readList('geonames-hotels.json')]).then(([groups, extra]) => {
+    const regions = new Set(Object.keys(groups));
+    for (const [name,city,state] of extra) {
+      mappedStays.push({name,city,state,kind:'hotel'});
+      regions.add(state);
+    }
+    for (const region of [...regions].sort()) byId('directoryState').add(new Option(region,region));
     for (const [state,rows] of Object.entries(groups)) {
-      byId('directoryState').add(new Option(state,state));
       for (const [name,city,kind,id] of rows) mappedStays.push({name,city,state,kind,id});
     }
     directoryError = false;
@@ -483,6 +494,7 @@ function renderDirectory(extend = false) {
   if (!extend) directoryLimit = 24;
   const section = byId('directorySection');
   section.hidden = (!directory.length && !mappedStays.length && !directoryError) || mode !== 'day' || byId('coupleFilter').checked;
+  byId('directoryLink').hidden = section.hidden;
   if (section.hidden) return;
   const chain = byId('chainChoice').value;
   const region = byId('directoryState').value;
@@ -490,16 +502,19 @@ function renderDirectory(extend = false) {
   const matches = directory.concat(mappedStays).filter(h => (!region || h.state === region) &&
     (!place || normalize(h.city || '').includes(place) || normalize(h.state || '') === place) &&
     (!chain || chain === h.chain) && matchesSearch(h));
+  byId('directoryLink').textContent = 'Browse '+matches.length.toLocaleString('en-IN')+' directory listings';
   byId('directoryCount').textContent = matches.length.toLocaleString('en-IN') + ' directory listings' + (directoryError ? ' · National directory unavailable. Search again to retry.' : '');
   byId('directoryList').replaceChildren(...matches.slice(0, directoryLimit).map(h => {
     const entry = node('li');
     entry.append(node('strong', h.name), node('small', [h.chain || h.kind,h.city,h.state].filter(Boolean).join(' · ')));
-    if (h.id) {
-      const link = node('a','View on map');
-      link.href = 'https://www.openstreetmap.org/' + h.id;
-      link.target = '_blank';
-      link.rel = 'noopener';
-      entry.append(link);
+    if (directoryPhotos[h.id]) {
+      const photo = node('img');
+      photo.src = directoryPhotos[h.id];
+      photo.alt = h.name;
+      photo.loading = 'lazy';
+      photo.className = 'directory-photo';
+      photo.onerror = () => photo.remove();
+      entry.prepend(photo);
     }
     return entry;
   }));
@@ -513,4 +528,4 @@ readList('hotel-directory.json').then(data => {
     if (![...city.options].some(option => option.value === destination)) city.add(new Option(destination, destination));
   }
   renderDirectory();
-}).catch(() => { byId('directorySection').hidden = true; });
+}).catch(() => renderDirectory());

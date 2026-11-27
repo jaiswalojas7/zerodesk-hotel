@@ -133,6 +133,7 @@
       <section id="hotelResults" hidden class="hotel-results" aria-labelledby="hotelHeading">
         <div class="results-head"><div><p class="eyebrow">HOTELS &amp; ROOMS</p><h2 id="hotelHeading">Find a stay in India</h2><p id="hotelCount" role="status"></p></div>
         <div class="result-filters"><label>Hotel chain<select id="chainChoice"><option value="">All chains</option></select></label><label>Price order<select id="priceOrder"><option value="">Recommended</option><option value="asc">Low to high</option><option value="desc">High to low</option></select></label><label class="couple-filter"><input type="checkbox" id="coupleFilter"> Couple-friendly only</label></div></div>
+        <nav class="results-index" aria-label="Hotel results"><a href="#propertyList" id="roomResultsLink">Rooms</a><a href="#directorySection" id="directoryLink" hidden>Directory</a></nav>
         <div id="propertyList" class="property-list"><p>Loading hotels…</p></div>
         <section id="directorySection" hidden aria-labelledby="directoryTitle">
           <h3 id="directoryTitle">India stay directory</h3>
@@ -140,7 +141,7 @@
           
           <label>State or territory <select id="directoryState"><option value="">All regions</option></select></label>
           <p id="directoryCount" role="status"></p>
-          <ul id="directoryList"></ul><p class="directory-credit">Map listings © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://data.humdata.org/dataset/hotosm_ind_points_of_interest">October 2026 extract</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL</a> · <a href="india-stays.json" download>Download directory data</a></p><button id="directoryMore" type="button" class="secondary">Show more hotels</button>
+          <ul id="directoryList"></ul><p class="directory-credit">Map listings © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://data.humdata.org/dataset/hotosm_ind_points_of_interest">October 2026 extract</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL</a> · <a href="india-stays.json" download>Download map data</a>. Additional hotel names and locations from <a href="https://www.geonames.org/">GeoNames</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · <a href="geonames-hotels.json" download>Download filtered hotel data</a>.</p><button id="directoryMore" type="button" class="secondary">Show more hotels</button>
         </section>
       </section>
       <dialog id="roomDialog" aria-labelledby="detailProperty">
@@ -382,6 +383,7 @@
 
       <div class="admin-panel">
         <h3>Bookings</h3>
+        <label class="admin-filter">Booking status <select id="adminStayStatus"><option value="">All bookings</option><option value="checked_in">Checked in</option><option value="checked_out">Checked out</option><option value="confirmed">Confirmed</option></select></label>
         <div id="adminBookings"></div>
       </div>
 

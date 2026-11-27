@@ -472,7 +472,25 @@ async function loadAdmin(){
  if(error){$('adminBookings').textContent=error.message;return;}
  const bs=data||[];
  $('stats').innerHTML=[['Total bookings',bs.length],['Checked in',bs.filter(b=>b.status==='checked_in').length],['Confirmed',bs.filter(b=>b.status==='confirmed').length],['Test booking value',money(bs.reduce((n,b)=>n+Number(b.total_amount),0))]].map(([label,value])=>`<div class="stat"><div class="num">${safe(value)}</div><div class="label">${label}</div></div>`).join('');
- $('adminBookings').innerHTML=bs.map(b=>`<div class="booking-row"><span style="min-width:0;overflow-wrap:anywhere"><strong data-guest-id="${safe(b.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(b.id.slice(0,8))}</small></span><span>${safe(b.catalog_label || ('Room ' + (rooms.find(r=>r.id===b.room_id)?.room_number||b.room_id)))}</span><span>${safe(stayDates(b))}</span><span>${money(b.total_amount)}</span><strong>${safe(b.status)}</strong>${b.status==='checked_in' ? `<button type="button" class="secondary" data-admin-checkout="${safe(b.id)}">Check out guest</button>` : ''}</div>`).join('')||'<p>No bookings.</p>';
+ const status = $('adminStayStatus').value;
+ const visible = bs.filter(booking => !status || booking.status === status);
+ const date = value => value ? value.slice(0,16).replace('T',' ') : '—';
+ const columns = ['Guest','Room','Scheduled check-in','Scheduled check-out','Amount','Status','Action'];
+ const rows = visible.map(booking => {
+   const room = rooms.find(item => item.id === booking.room_id);
+   const action = booking.status === 'checked_in'
+     ? `<button type="button" class="primary" data-admin-checkout="${safe(booking.id)}">Check out</button>` : '—';
+   const cells = [
+     `<strong data-guest-id="${safe(booking.guest_id)}">Name unavailable</strong><br><small>Booking ${safe(booking.id.slice(0,8))}</small>`,
+     safe(booking.catalog_label || 'Room ' + (room?.room_number || booking.room_id)),
+     safe(date(booking.slot_start || booking.check_in)), safe(date(booking.slot_end || booking.check_out)),
+     money(booking.total_amount), safe(booking.status.replaceAll('_',' ')), action
+   ];
+   return '<tr>' + cells.map((cell,i) => `<td data-label="${columns[i]}">${cell}</td>`).join('') + '</tr>';
+ });
+ $('adminBookings').innerHTML = rows.length ? '<table class="stay-table" aria-label="Guest bookings"><thead><tr>' +
+   columns.map(label => '<th scope="col">'+label+'</th>').join('') +
+   '</tr></thead><tbody>'+rows.join('')+'</tbody></table>' : '<p>No bookings with this status.</p>';
  $('adminRooms').innerHTML=rooms.map(r=>`<div class="room-status"><strong>Room ${safe(r.room_number)}</strong><p>${safe(r.room_type)}</p><p>${money(r.price_per_night)} / night</p></div>`).join('');
  const nameLabels = Array.from($('adminBookings').querySelectorAll('[data-guest-id]'));
  const guestIds = [...new Set(nameLabels.map(label => label.dataset.guestId).filter(Boolean))];
@@ -495,6 +513,7 @@ async function loadAdmin(){
   if (name) label.textContent = name;
  }
 }
+$('adminStayStatus').onchange=loadAdmin;
 $('adminBookings').addEventListener('click',async event=>{
  const button=event.target.closest('[data-admin-checkout]');
  if(!button || !isAdmin)return;
