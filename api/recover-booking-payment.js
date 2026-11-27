@@ -97,18 +97,24 @@ module.exports = async (req, res) => {
       });
     }
 
-    if (
-      !["pending", "paid"].includes(record.status)
-    ) {
-      return res.status(409).json({
-        error: "Payment requires manual resolution"
-      });
+    const razorpay = new Razorpay({key_id: keyId, key_secret: keySecret});
+    if (record.status === "booking_failed" && record.razorpay_payment_id) {
+      const payment = await razorpay.payments.fetch(record.razorpay_payment_id);
+      if (payment.order_id !== orderId || payment.currency !== "INR" ||
+          payment.amount !== Number(record.amount_paise)) {
+        return res.status(409).json({error: "Payment details need staff review."});
+      }
+      const refunded = Number(payment.amount_refunded || 0);
+      const message = payment.status === "refunded" && refunded === payment.amount
+        ? "Razorpay reports a full refund for this order."
+        : refunded > 0
+          ? "Razorpay reports a partial refund. Keep this reference for the remaining balance."
+          : "Payment captured, room unavailable. No refund is recorded yet. Keep this reference for staff review and do not pay again.";
+      return res.status(200).json({bookingConfirmed: false, paymentMessage: message});
     }
-
-    const razorpay = new Razorpay({
-      key_id: keyId,
-      key_secret: keySecret
-    });
+    if (!["pending", "paid"].includes(record.status)) {
+      return res.status(409).json({error: "Payment requires manual resolution"});
+    }
 
     // Ask Razorpay for the actual order.
     const order = await razorpay.orders.fetch(orderId);

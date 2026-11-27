@@ -1,4 +1,5 @@
 const Razorpay = require("razorpay");
+const {createCatalogOrder} = require("../server/catalog-checkout");
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -112,6 +113,13 @@ if (
     if (!user || !user.id) {
       return res.status(401).json({
         error: "Invalid session"
+      });
+    }
+
+    if (req.body?.catalogCode) {
+      return await createCatalogOrder(req.body, res, {
+        user, keyId, base:SUPABASE_URL, headers:serverHeaders(),
+        razorpay:new Razorpay({key_id:keyId, key_secret:keySecret})
       });
     }
 
